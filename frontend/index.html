@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BERANI — Komunitas Belajar Guru SDN CITERE</title>
+<meta name="description" content="BERANI: Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE.">
+
+<!-- Open Graph (tampilan saat dibagikan di WhatsApp/Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BERANI — Komunitas Belajar Guru SDN CITERE">
+<meta property="og:description" content="Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE. Siklus belajar, program kerja, dan sumber daya mengajar bersama.">
+<meta property="og:image" content="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
+<meta property="og:locale" content="id_ID">
+
+<!-- Twitter Card (fallback untuk platform yang membaca tag ini) -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BERANI — Komunitas Belajar Guru SDN CITERE">
+<meta name="twitter:description" content="Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE.">
+<meta name="twitter:image" content="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
+
+<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container">
+    <div class="brand">
+      <img class="brand-logo" id="brandLogo" src="" alt="Logo BERANI">
+      <span>
+        <span id="brandNama">BERANI</span>
+        <small id="brandSekolah">SDN CITERE</small>
+      </span>
+    </div>
+    <button class="nav-toggle" id="navToggle">Menu</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#beranda" class="nav-item">🏠 Beranda</a>
+      <div class="nav-dropdown" id="profilDropdown">
+        <button class="nav-item dropdown-toggle" type="button">👤 Profil <span class="caret">▾</span></button>
+        <div class="dropdown-menu">
+          <a href="#profil">Tentang Kami</a>
+          <a href="#profil-visi">Visi &amp; Misi</a>
+          <a href="#anggota">Struktur Organisasi</a>
+          <a href="#program">Program Kerja</a>
+        </div>
+      </div>
+      <a href="#siklus" class="nav-item">🔄 Siklus Belajar</a>
+      <a href="#jadwal" class="nav-item">📅 Jadwal</a>
+      <a href="#notulen" class="nav-item">🗒️ Notulen Kombel</a>
+      <a href="#sumberdaya" class="nav-item">📁 Bank Sumber Daya</a>
+      <a href="#jurnal" class="nav-item">📝 Jurnal Guru</a>
+      <a href="#galeri" class="nav-item">🖼️ Galeri</a>
+      <a href="#kontak" class="nav-item">✉️ Kontak</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="beranda">
+  <div class="hero-blob b1"></div>
+  <div class="hero-blob b2"></div>
+  <div class="hero-blob b3"></div>
+  <div class="container">
+    <nav class="spine" id="spine" aria-label="Kepanjangan BERANI"></nav>
+    <div class="hero-main">
+      <div class="hero-copy">
+        <p class="eyebrow">Komunitas Belajar Guru · SDN CITERE</p>
+        <h1>Guru yang terus <em>belajar</em>, kelas yang terus tumbuh.</h1>
+        <p class="lede" id="profil-tagline">Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi.</p>
+        <div class="cta-row">
+          <a href="#siklus" class="btn btn-primary">Lihat Siklus Belajar</a>
+          <a href="#program" class="btn btn-teal">Lihat Program Kerja</a>
+          <a href="#profil" class="btn btn-ghost">Kenali BERANI</a>
+        </div>
+        <div class="pillars" id="pillars"></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-emblem"><img id="heroEmblem" src="" alt="Logo BERANI"></div>
+        <div class="hero-card-title" id="heroCardTitle">BERANI</div>
+        <div class="hero-card-sub" id="heroCardSub">SDN CITERE</div>
+        <div class="hero-card-info">
+          <div class="hero-card-row">
+            <span class="icon">📍</span>
+            <div><div class="label">Alamat</div><div class="val" id="heroCardAlamat">—</div></div>
+          </div>
+          <div class="hero-card-row">
+            <span class="icon">✉️</span>
+            <div><div class="label">Email</div><div class="val" id="heroCardEmail">—</div></div>
+          </div>
+          <div class="hero-card-row">
+            <span class="icon">📱</span>
+            <div><div class="label">WhatsApp</div><div class="val" id="heroCardWhatsapp">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="profil">
+  <div class="container about-grid">
+    <div>
+      <p class="eyebrow reveal">Tentang Kami</p>
+      <h2 class="reveal">Kenapa BERANI ada di SDN CITERE</h2>
+      <p class="reveal" id="profil-deskripsi" style="margin-top:1rem;color:rgba(32,36,31,0.75);"></p>
+      <div id="pillar-detail" style="margin-top:1.4rem;"></div>
+    </div>
+    <div class="reveal">
+      <p class="quote" id="profil-visi"></p>
+      <p class="eyebrow">Misi Kami</p>
+      <ul class="misi-list" id="profil-misi"></ul>
+    </div>
+  </div>
+</section>
+
+<section id="anggota">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Berdasarkan AD/ART Kombel</p>
+        <h2>Struktur Organisasi</h2>
+      </div>
+      <p>Bagan kepengurusan Komunitas Belajar BERANI SDN CITERE, dari penasihat hingga seluruh guru sebagai anggota.</p>
+    </div>
+    <div class="anggota-grid orgchart" id="anggota-grid"></div>
+  </div>
+</section>
+
+<section id="siklus">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Cara Kombel Bekerja</p>
+        <h2>Siklus Belajar BERANI</h2>
+      </div>
+      <p>Empat tahap yang terus berulang setiap periode — bukan proyek sekali jalan, tapi kebiasaan belajar bersama.</p>
+    </div>
+    <div class="siklus-wrap">
+      <nav class="siklus-stages" id="siklusStages" aria-label="Tahapan siklus belajar"></nav>
+      <div class="siklus-detail" id="siklusDetail"></div>
+    </div>
+  </div>
+</section>
+
+<section id="jadwal">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Rutin dan Terjadwal</p>
+        <h2>Jadwal Kegiatan</h2>
+      </div>
+      <p>Pertemuan Kombel dimasukkan ke jam kerja efektif guru, bukan tambahan di luar jadwal.</p>
+    </div>
+    <div class="jadwal-list" id="jadwal-list"></div>
+  </div>
+</section>
+
+<section id="notulen">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Hasil Kesepakatan Bersama</p>
+        <h2>Notulen Pertemuan Kombel</h2>
+      </div>
+      <p>Beda dengan jurnal mengajar pribadi — ini catatan resmi hasil diskusi dan kesepakatan dari pertemuan Kombel yang dihadiri banyak guru.</p>
+    </div>
+    <div class="notulen-list" id="notulen-list"></div>
+  </div>
+</section>
+
+<section id="program">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Sedang &amp; Sudah Berjalan</p>
+        <h2>Program Kerja</h2>
+      </div>
+      <p>Kegiatan rutin dan proyek bersama yang menghidupkan komunitas belajar guru.</p>
+    </div>
+    <div class="carousel">
+      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat program sebelumnya">‹</button>
+      <div class="card-grid" id="program-grid"></div>
+      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat program berikutnya">›</button>
+    </div>
+  </div>
+</section>
+
+<section id="sumberdaya">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Saling Berbagi, Tak Perlu Mulai dari Nol</p>
+        <h2>Bank Sumber Daya</h2>
+      </div>
+      <p>Modul ajar, ATP, asesmen, dan LKS hasil kesepakatan Kombel — bebas diunduh dan dipakai guru SDN CITERE.</p>
+    </div>
+    <div class="sumberdaya-filter reveal">
+      <input type="text" id="sumberdayaCari" placeholder="Cari judul atau mapel…">
+      <select id="sumberdayaJenis"><option value="">Semua jenis</option></select>
+      <select id="sumberdayaKelas"><option value="">Semua kelas</option></select>
+    </div>
+    <div class="carousel">
+      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat sumber daya sebelumnya">‹</button>
+      <div class="sumberdaya-grid" id="sumberdaya-grid"></div>
+      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat sumber daya berikutnya">›</button>
+    </div>
+  </div>
+</section>
+
+<section id="jurnal">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Praktik Baik Mingguan</p>
+        <h2>Jurnal Mengajar Guru</h2>
+      </div>
+      <p>Catatan reflektif PRIBADI tiap guru dari ruang kelas masing-masing — beda dengan Notulen Kombel yang isinya kesepakatan bersama.</p>
+    </div>
+    <div class="carousel">
+      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat jurnal sebelumnya">‹</button>
+      <div class="jurnal-grid" id="jurnal-grid"></div>
+      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat jurnal berikutnya">›</button>
+    </div>
+  </div>
+</section>
+
+<section id="galeri">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Dokumentasi</p>
+        <h2>Galeri Kegiatan</h2>
+      </div>
+      <p>Momen-momen dari kelas berbagi, lesson study, dan kegiatan komunitas lainnya.</p>
+    </div>
+    <div class="carousel">
+      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat galeri sebelumnya">‹</button>
+      <div class="galeri-grid" id="galeri-grid"></div>
+      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat galeri berikutnya">›</button>
+    </div>
+  </div>
+</section>
+
+<section id="kontak">
+  <div class="container">
+    <div class="kontak-wrap reveal">
+      <div>
+        <p class="eyebrow">Hubungi Kami</p>
+        <h2>Mari berkolaborasi dengan BERANI</h2>
+        <ul class="kontak-list" id="kontak-list"></ul>
+      </div>
+      <div class="kontak-card">
+        <p class="eyebrow" style="color:var(--marigold)">Untuk Guru SDN CITERE</p>
+        <p>Ingin berbagi praktik baik atau punya usul kegiatan? Sampaikan langsung ke koordinator komunitas lewat WhatsApp atau email di samping.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>&copy; <span id="year"></span> BERANI — Komunitas Belajar Guru SDN CITERE</span>
+    <span>Berdedikasi · Rajin Berkolaborasi · Niat Menginspirasi</span>
+  </div>
+</footer>
+
+<script src="../shared/config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

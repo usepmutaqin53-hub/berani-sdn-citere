@@ -1,0 +1,194 @@
+/* BERANI — Admin panel styles. Tokens diwarisi dari ../frontend/style.css */
+
+body.admin { background: var(--paper-alt); }
+
+/* ---------- Login screen ---------- */
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.login-card {
+  width: min(400px, 100%);
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  padding: 2.4rem;
+  box-shadow: var(--shadow);
+}
+
+.login-card .mark {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  background: var(--pine);
+  color: var(--marigold);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.login-card h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+.login-card p.sub { color: rgba(32,36,31,0.65); font-size: 0.9rem; margin: 0 0 1.6rem; }
+
+.field { display: grid; gap: 0.4rem; margin-bottom: 1.2rem; }
+.field label { font-size: 0.82rem; font-weight: 700; color: var(--pine-dark); }
+.field input,
+.field textarea,
+.field select {
+  font: inherit;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+}
+.field textarea { resize: vertical; min-height: 90px; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--pine); outline: none; }
+.field .hint { font-size: 0.76rem; color: rgba(32,36,31,0.55); }
+.logo-preview-row { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.3rem; }
+.logo-preview {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line, #ddd);
+  background: #f2f0e4;
+  flex: none;
+}
+.logo-preview-row .meta { font-size: 0.78rem; color: rgba(32,36,31,0.55); }
+.field .meta { font-size: 0.8rem; color: rgba(32,36,31,0.6); line-height: 1.5; margin: -0.4rem 0 0; }
+
+.form-error {
+  background: #F7E4E7; color: var(--maroon);
+  border: 1px solid rgba(140,59,74,0.3);
+  padding: 0.7rem 0.9rem; border-radius: var(--radius-sm);
+  font-size: 0.86rem; margin-bottom: 1rem; display: none;
+}
+.form-error.is-visible { display: block; }
+
+.form-success {
+  background: var(--pine-tint); color: var(--pine-dark);
+  border: 1px solid rgba(22,66,60,0.25);
+  padding: 0.6rem 0.9rem; border-radius: var(--radius-sm);
+  font-size: 0.84rem; margin-bottom: 1rem; display: none;
+}
+.form-success.is-visible { display: block; }
+
+/* ---------- Dashboard shell ---------- */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+.admin-side {
+  background: linear-gradient(165deg, var(--pine-dark) 0%, var(--pine) 100%);
+  color: var(--paper);
+  padding: 1.6rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 0.6rem;
+  vertical-align: middle;
+}
+.dot-0 { background: var(--accent-0); }
+.dot-1 { background: var(--accent-1); }
+.dot-2 { background: var(--accent-2); }
+.dot-3 { background: var(--accent-3); }
+.dot-4 { background: var(--accent-4); }
+.dot-5 { background: var(--accent-5); }
+
+.side-nav button.is-active .dot { background: var(--pine-dark); }
+
+.admin-side .brand-mini {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+.admin-side .brand-mini .mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--marigold); color: var(--pine-dark);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+}
+
+.side-nav { display: grid; gap: 0.3rem; flex: 1; }
+.side-nav button {
+  all: unset; cursor: pointer;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem; font-weight: 600;
+  color: rgba(242,240,228,0.75);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.side-nav button:hover { background: rgba(242,240,228,0.08); color: #fff; }
+.side-nav button.is-active { background: var(--marigold); color: var(--pine-dark); }
+
+.side-foot { border-top: 1px solid rgba(242,240,228,0.15); padding-top: 1rem; }
+.side-foot a { font-size: 0.82rem; color: rgba(242,240,228,0.6); }
+.side-foot button.logout {
+  all: unset; cursor: pointer; color: var(--marigold);
+  font-size: 0.86rem; font-weight: 700; margin-top: 0.6rem;
+}
+
+.admin-main { padding: 2.4rem clamp(1.4rem, 3vw, 3rem); }
+
+.admin-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+}
+.admin-header h1 { font-size: 1.7rem; }
+.admin-header p { margin: 0.3rem 0 0; color: rgba(32,36,31,0.6); font-size: 0.9rem; }
+
+.panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--pine);
+  border-radius: var(--radius);
+  padding: 1.6rem;
+  margin-bottom: 1.6rem;
+}
+#tab-profil .panel { border-top-color: var(--accent-0); }
+#tab-program .panel { border-top-color: var(--accent-1); }
+#tab-jurnal .panel { border-top-color: var(--accent-2); }
+#tab-galeri .panel { border-top-color: var(--accent-3); }
+#tab-kontak .panel { border-top-color: var(--accent-4); }
+.panel h2 { font-size: 1.1rem; margin-bottom: 1.1rem; }
+
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.4rem; }
+.form-grid .span-2 { grid-column: 1 / -1; }
+
+/* ---------- Data table ---------- */
+table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.admin-table th {
+  text-align: left; font-family: var(--font-mono); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--teal); padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--line-strong);
+}
+table.admin-table td { padding: 0.7rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.admin-table tr:hover td { background: var(--paper-alt); }
+.row-actions { display: flex; gap: 0.4rem; }
+
+.badge {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  padding: 0.2rem 0.55rem; border-radius: 999px;
+  background: var(--pine-tint); color: var(--pine-dark);
+}
+
+@media (max-width: 860px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-side { flex-direction: row; align-items: center; overflow-x: auto; }
+  .side-nav { flex-direction: row; }
+  .side-foot { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+}
