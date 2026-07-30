@@ -337,6 +337,20 @@ function renderProgram(list) {
 
 const JENIS_ICON = { 'Modul Ajar': '📘', 'ATP': '🗺️', 'Asesmen': '✅', 'LKS': '📄', 'Media Ajar': '🎬' };
 
+// Daftar kelas baku (dipakai juga oleh panel admin) — Kelas 1 s.d. 6, plus
+// opsi rombel dengan huruf A/B/C (mis. Kelas 1A, Kelas 2B) untuk sekolah
+// yang punya lebih dari satu rombongan belajar per tingkat.
+const KELAS_OPTIONS = ['Kelas 1', 'Kelas 1A', 'Kelas 1B', 'Kelas 1C',
+  'Kelas 2', 'Kelas 2A', 'Kelas 2B', 'Kelas 2C',
+  'Kelas 3', 'Kelas 3A', 'Kelas 3B', 'Kelas 3C',
+  'Kelas 4', 'Kelas 4A', 'Kelas 4B', 'Kelas 4C',
+  'Kelas 5', 'Kelas 5A', 'Kelas 5B', 'Kelas 5C',
+  'Kelas 6', 'Kelas 6A', 'Kelas 6B', 'Kelas 6C'];
+
+function normalizeKelas_(v) {
+  return (v || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 function renderSumberDaya(list) {
   const wrap = document.getElementById('sumberdaya-grid');
   setupCarousel('sumberdaya-grid');
@@ -345,9 +359,8 @@ function renderSumberDaya(list) {
   const kelasEl = document.getElementById('sumberdayaKelas');
 
   const jenisSet = Array.from(new Set(list.map(function (r) { return r.jenis; }).filter(Boolean))).sort();
-  const kelasSet = Array.from(new Set(list.map(function (r) { return r.kelas; }).filter(Boolean))).sort();
   jenisEl.innerHTML = '<option value="">Semua jenis</option>' + jenisSet.map(function (j) { return '<option value="' + escapeHtml(j) + '">' + escapeHtml(j) + '</option>'; }).join('');
-  kelasEl.innerHTML = '<option value="">Semua kelas</option>' + kelasSet.map(function (k) { return '<option value="' + escapeHtml(k) + '">' + escapeHtml(k) + '</option>'; }).join('');
+  kelasEl.innerHTML = '<option value="">Semua kelas</option>' + KELAS_OPTIONS.map(function (k) { return '<option value="' + escapeHtml(k) + '">' + escapeHtml(k) + '</option>'; }).join('');
 
   function draw() {
     const q = cariEl.value.trim().toLowerCase();
@@ -356,7 +369,7 @@ function renderSumberDaya(list) {
     const filtered = list.filter(function (r) {
       const matchQ = !q || (r.judul || '').toLowerCase().indexOf(q) !== -1 || (r.mapel || '').toLowerCase().indexOf(q) !== -1;
       const matchJenis = !jenisFilter || r.jenis === jenisFilter;
-      const matchKelas = !kelasFilter || r.kelas === kelasFilter;
+      const matchKelas = !kelasFilter || normalizeKelas_(r.kelas) === normalizeKelas_(kelasFilter);
       return matchQ && matchJenis && matchKelas;
     });
 
