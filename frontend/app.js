@@ -97,7 +97,7 @@ function renderSpineAndPillars() {
   spine.innerHTML = PILLARS.map(function (p, i) {
     return '<button class="letter-' + i + '" data-target="pillar-' + i + '" aria-label="' + p.word + '">' + p.letter + '</button>';
   }).join('');
-  pillarWrap.innerHTML = PILLARS.slice(0, 3).map(function (p, i) {
+  pillarWrap.innerHTML = PILLARS.map(function (p, i) {
     return '<div class="pillar-card letter-' + i + '" id="pillar-' + i + '"><div class="letter letter-' + i + '">' + p.letter + '</div><h3>' + p.word + '</h3><p>' + p.desc + '</p></div>';
   }).join('');
 
@@ -153,7 +153,7 @@ function renderSiklus(list, activeKey) {
 
 const ORG_ROLES = [
   { key: 'penasihat', match: /penasihat|kepala sekolah/i, label: 'Penasihat / Kepala Sekolah', duty: 'Memberikan arahan, dukungan kebijakan, serta memfasilitasi kebutuhan operasional komunitas di lingkungan sekolah.' },
-  { key: 'ketua', match: /ketua/i, label: 'Ketua Komunitas', duty: 'Memimpin jalannya organisasi komunitas belajar serta mengoordinasikan seluruh program kerja dan jadwal pertemuan rutin bersama anggota.' },
+  { key: 'ketua', match: /ketua/i, label: 'Ketua Komunitas', duty: 'Memimpin jalannya organisasi komunitas belajar serta mengkoordinasikan seluruh program kerja dan jadwal pertemuan rutin bersama anggota.' },
   { key: 'sekretaris', match: /sekretaris/i, label: 'Sekretaris', duty: 'Mengelola administrasi komunitas, mencatat hasil notulensi setiap pertemuan, serta mendokumentasikan lembar refleksi kegiatan.' },
   { key: 'fasilitator', match: /fasilitator|narasumber/i, label: 'Fasilitator / Narasumber', sub: 'Bergilir sesuai topik antarguru', duty: 'Memimpin sesi diskusi, membagikan praktik baik, atau memaparkan materi sesuai topik yang dijadwalkan, secara bergantian antarguru.' },
   { key: 'anggota', match: /.*/, label: 'Anggota Komunitas', sub: 'Seluruh guru aktif SDN CITERE', duty: 'Berpartisipasi aktif dalam kegiatan diskusi, bedah masalah pembelajaran, dan observasi kelas timbal-balik (peer observation).' },
