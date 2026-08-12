@@ -73,15 +73,19 @@ async function fetchBerani() {
     const res = await fetch(url + '?action=getAll');
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);
+    // API sudah tersambung dan berhasil dibaca: pakai data apa adanya,
+    // termasuk kalau memang kosong (mis. sudah dihapus lewat admin/spreadsheet).
+    // FALLBACK_DATA di sini hanya jaga-jaga kalau key-nya benar-benar tidak ada
+    // di response (bukan sebagai pengganti data kosong).
     return {
       profil: json.data.profil || FALLBACK_DATA.profil,
-      program: json.data.program && json.data.program.length ? json.data.program : FALLBACK_DATA.program,
-      siklus: json.data.siklus && json.data.siklus.length ? json.data.siklus : FALLBACK_DATA.siklus,
-      sumberdaya: json.data.sumberdaya && json.data.sumberdaya.length ? json.data.sumberdaya : FALLBACK_DATA.sumberdaya,
-      anggota: json.data.anggota && json.data.anggota.length ? json.data.anggota : FALLBACK_DATA.anggota,
-      jadwal: json.data.jadwal && json.data.jadwal.length ? json.data.jadwal : FALLBACK_DATA.jadwal,
-      jurnal: json.data.jurnal && json.data.jurnal.length ? json.data.jurnal : FALLBACK_DATA.jurnal,
-      notulen: json.data.notulen && json.data.notulen.length ? json.data.notulen : FALLBACK_DATA.notulen,
+      program: json.data.program || [],
+      siklus: json.data.siklus || [],
+      sumberdaya: json.data.sumberdaya || [],
+      anggota: json.data.anggota || [],
+      jadwal: json.data.jadwal || [],
+      jurnal: json.data.jurnal || [],
+      notulen: json.data.notulen || [],
       galeri: json.data.galeri || [],
       kontak: json.data.kontak || FALLBACK_DATA.kontak,
     };
@@ -97,7 +101,7 @@ function renderSpineAndPillars() {
   spine.innerHTML = PILLARS.map(function (p, i) {
     return '<button class="letter-' + i + '" data-target="pillar-' + i + '" aria-label="' + p.word + '">' + p.letter + '</button>';
   }).join('');
-  pillarWrap.innerHTML = PILLARS.map(function (p, i) {
+  pillarWrap.innerHTML = PILLARS.slice(0, 3).map(function (p, i) {
     return '<div class="pillar-card letter-' + i + '" id="pillar-' + i + '"><div class="letter letter-' + i + '">' + p.letter + '</div><h3>' + p.word + '</h3><p>' + p.desc + '</p></div>';
   }).join('');
 
@@ -153,7 +157,7 @@ function renderSiklus(list, activeKey) {
 
 const ORG_ROLES = [
   { key: 'penasihat', match: /penasihat|kepala sekolah/i, label: 'Penasihat / Kepala Sekolah', duty: 'Memberikan arahan, dukungan kebijakan, serta memfasilitasi kebutuhan operasional komunitas di lingkungan sekolah.' },
-  { key: 'ketua', match: /ketua/i, label: 'Ketua Komunitas', duty: 'Memimpin jalannya organisasi komunitas belajar serta mengkoordinasikan seluruh program kerja dan jadwal pertemuan rutin bersama anggota.' },
+  { key: 'ketua', match: /ketua/i, label: 'Ketua Komunitas', duty: 'Memimpin jalannya organisasi komunitas belajar serta mengoordinasikan seluruh program kerja dan jadwal pertemuan rutin bersama anggota.' },
   { key: 'sekretaris', match: /sekretaris/i, label: 'Sekretaris', duty: 'Mengelola administrasi komunitas, mencatat hasil notulensi setiap pertemuan, serta mendokumentasikan lembar refleksi kegiatan.' },
   { key: 'fasilitator', match: /fasilitator|narasumber/i, label: 'Fasilitator / Narasumber', sub: 'Bergilir sesuai topik antarguru', duty: 'Memimpin sesi diskusi, membagikan praktik baik, atau memaparkan materi sesuai topik yang dijadwalkan, secara bergantian antarguru.' },
   { key: 'anggota', match: /.*/, label: 'Anggota Komunitas', sub: 'Seluruh guru aktif SDN CITERE', duty: 'Berpartisipasi aktif dalam kegiatan diskusi, bedah masalah pembelajaran, dan observasi kelas timbal-balik (peer observation).' },
@@ -337,20 +341,6 @@ function renderProgram(list) {
 
 const JENIS_ICON = { 'Modul Ajar': '📘', 'ATP': '🗺️', 'Asesmen': '✅', 'LKS': '📄', 'Media Ajar': '🎬' };
 
-// Daftar kelas baku (dipakai juga oleh panel admin) — Kelas 1 s.d. 6, plus
-// opsi rombel dengan huruf A/B/C (mis. Kelas 1A, Kelas 2B) untuk sekolah
-// yang punya lebih dari satu rombongan belajar per tingkat.
-const KELAS_OPTIONS = ['Kelas 1', 'Kelas 1A', 'Kelas 1B', 'Kelas 1C',
-  'Kelas 2', 'Kelas 2A', 'Kelas 2B', 'Kelas 2C',
-  'Kelas 3', 'Kelas 3A', 'Kelas 3B', 'Kelas 3C',
-  'Kelas 4', 'Kelas 4A', 'Kelas 4B', 'Kelas 4C',
-  'Kelas 5', 'Kelas 5A', 'Kelas 5B', 'Kelas 5C',
-  'Kelas 6', 'Kelas 6A', 'Kelas 6B', 'Kelas 6C'];
-
-function normalizeKelas_(v) {
-  return (v || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
 function renderSumberDaya(list) {
   const wrap = document.getElementById('sumberdaya-grid');
   setupCarousel('sumberdaya-grid');
@@ -359,8 +349,9 @@ function renderSumberDaya(list) {
   const kelasEl = document.getElementById('sumberdayaKelas');
 
   const jenisSet = Array.from(new Set(list.map(function (r) { return r.jenis; }).filter(Boolean))).sort();
+  const kelasSet = Array.from(new Set(list.map(function (r) { return r.kelas; }).filter(Boolean))).sort();
   jenisEl.innerHTML = '<option value="">Semua jenis</option>' + jenisSet.map(function (j) { return '<option value="' + escapeHtml(j) + '">' + escapeHtml(j) + '</option>'; }).join('');
-  kelasEl.innerHTML = '<option value="">Semua kelas</option>' + KELAS_OPTIONS.map(function (k) { return '<option value="' + escapeHtml(k) + '">' + escapeHtml(k) + '</option>'; }).join('');
+  kelasEl.innerHTML = '<option value="">Semua kelas</option>' + kelasSet.map(function (k) { return '<option value="' + escapeHtml(k) + '">' + escapeHtml(k) + '</option>'; }).join('');
 
   function draw() {
     const q = cariEl.value.trim().toLowerCase();
@@ -369,7 +360,7 @@ function renderSumberDaya(list) {
     const filtered = list.filter(function (r) {
       const matchQ = !q || (r.judul || '').toLowerCase().indexOf(q) !== -1 || (r.mapel || '').toLowerCase().indexOf(q) !== -1;
       const matchJenis = !jenisFilter || r.jenis === jenisFilter;
-      const matchKelas = !kelasFilter || normalizeKelas_(r.kelas) === normalizeKelas_(kelasFilter);
+      const matchKelas = !kelasFilter || r.kelas === kelasFilter;
       return matchQ && matchJenis && matchKelas;
     });
 
