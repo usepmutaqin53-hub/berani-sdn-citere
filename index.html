@@ -3,270 +3,432 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BERANI — Komunitas Belajar Guru SDN CITERE</title>
-<meta name="description" content="BERANI: Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE.">
-
-<!-- Open Graph (tampilan saat dibagikan di WhatsApp/Facebook) -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="BERANI — Komunitas Belajar Guru SDN CITERE">
-<meta property="og:description" content="Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE. Siklus belajar, program kerja, dan sumber daya mengajar bersama.">
-<meta property="og:image" content="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
-<meta property="og:locale" content="id_ID">
-
-<!-- Twitter Card (fallback untuk platform yang membaca tag ini) -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="BERANI — Komunitas Belajar Guru SDN CITERE">
-<meta name="twitter:description" content="Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi — komunitas belajar guru SDN CITERE.">
-<meta name="twitter:image" content="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
-
-<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dbzlvjyzw/image/upload/v1784903915/WhatsApp_Image_2026-07-24_at_17.34.23_nhqxie.jpg">
+<title>Admin — BERANI</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../frontend/style.css">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="admin">
 
-<nav class="nav">
-  <div class="container">
-    <div class="brand">
-      <img class="brand-logo" id="brandLogo" src="" alt="Logo BERANI">
-      <span>
-        <span id="brandNama">BERANI</span>
-        <small id="brandSekolah">SDN CITERE</small>
-      </span>
-    </div>
-    <button class="nav-toggle" id="navToggle">Menu</button>
-    <div class="nav-links" id="navLinks">
-      <a href="#beranda" class="nav-item">🏠 Beranda</a>
-      <div class="nav-dropdown" id="profilDropdown">
-        <button class="nav-item dropdown-toggle" type="button">👤 Profil <span class="caret">▾</span></button>
-        <div class="dropdown-menu">
-          <a href="#profil">Tentang Kami</a>
-          <a href="#profil-visi">Visi &amp; Misi</a>
-          <a href="#anggota">Struktur Organisasi</a>
-          <a href="#program">Program Kerja</a>
-        </div>
+<!-- ===================== LOGIN ===================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img class="brand-logo" id="loginLogo" src="" alt="Logo BERANI" style="width:52px;height:52px;border-radius:14px;margin-bottom:1.2rem;">
+    <h1>Admin BERANI</h1>
+    <p class="sub">Masuk untuk mengelola konten website komunitas.</p>
+    <div class="form-error" id="loginError"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginPassword">Kata sandi admin</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+        <span class="hint">Diatur lewat setAdminPassword() di Apps Script. Lihat README.md.</span>
       </div>
-      <a href="#siklus" class="nav-item">🔄 Siklus Belajar</a>
-      <a href="#jadwal" class="nav-item">📅 Jadwal</a>
-      <a href="#notulen" class="nav-item">🗒️ Notulen Kombel</a>
-      <a href="#sumberdaya" class="nav-item">📁 Bank Sumber Daya</a>
-      <a href="#jurnal" class="nav-item">📝 Jurnal Guru</a>
-      <a href="#galeri" class="nav-item">🖼️ Galeri</a>
-      <a href="#kontak" class="nav-item">✉️ Kontak</a>
-    </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Masuk</button>
+    </form>
+    <p class="hint" style="margin-top:1.2rem;"><a href="../frontend/index.html">&larr; Kembali ke website</a></p>
   </div>
-</nav>
+</div>
 
-<header class="hero" id="beranda">
-  <div class="hero-blob b1"></div>
-  <div class="hero-blob b2"></div>
-  <div class="hero-blob b3"></div>
-  <div class="container">
-    <nav class="spine" id="spine" aria-label="Kepanjangan BERANI"></nav>
-    <div class="hero-main">
-      <div class="hero-copy">
-        <p class="eyebrow">Komunitas Belajar Guru · SDN CITERE</p>
-        <h1>Guru yang terus <em>belajar</em>, kelas yang terus tumbuh.</h1>
-        <p class="lede" id="profil-tagline">Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi.</p>
-        <div class="cta-row">
-          <a href="#siklus" class="btn btn-primary">Lihat Siklus Belajar</a>
-          <a href="#program" class="btn btn-teal">Lihat Program Kerja</a>
-          <a href="#profil" class="btn btn-ghost">Kenali BERANI</a>
-        </div>
-        <div class="pillars" id="pillars"></div>
+<!-- ===================== DASHBOARD ===================== -->
+<div class="admin-shell" id="dashboard" style="display:none;">
+  <aside class="admin-side">
+    <div class="brand-mini"><img class="brand-logo" id="sideLogo" src="" alt="Logo BERANI" style="width:32px;height:32px;border-radius:8px;"> BERANI Admin</div>
+    <nav class="side-nav">
+      <button data-tab="profil" class="is-active"><span class="dot dot-0"></span>Profil Komunitas</button>
+      <button data-tab="anggota"><span class="dot dot-1"></span>Struktur Anggota</button>
+      <button data-tab="siklus"><span class="dot dot-2"></span>Siklus Belajar</button>
+      <button data-tab="jadwal"><span class="dot dot-3"></span>Jadwal Kegiatan</button>
+      <button data-tab="notulen"><span class="dot dot-4"></span>Notulen Kombel</button>
+      <button data-tab="program"><span class="dot dot-5"></span>Program Kerja</button>
+      <button data-tab="sumberdaya"><span class="dot dot-0"></span>Bank Sumber Daya</button>
+      <button data-tab="jurnal"><span class="dot dot-1"></span>Jurnal Guru</button>
+      <button data-tab="galeri"><span class="dot dot-2"></span>Galeri</button>
+      <button data-tab="kontak"><span class="dot dot-3"></span>Kontak</button>
+    </nav>
+    <div class="side-foot">
+      <a href="../frontend/index.html" target="_blank">Lihat website &#8599;</a>
+      <button class="logout" id="logoutBtn">Keluar</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ---------- Tab: Profil ---------- -->
+    <section class="tab-panel is-active" id="tab-profil">
+      <div class="admin-header">
+        <div><h1>Profil Komunitas</h1><p>Identitas, tagline, visi, dan misi BERANI yang tampil di beranda.</p></div>
       </div>
-      <div class="hero-card">
-        <div class="hero-emblem"><img id="heroEmblem" src="" alt="Logo BERANI"></div>
-        <div class="hero-card-title" id="heroCardTitle">BERANI</div>
-        <div class="hero-card-sub" id="heroCardSub">SDN CITERE</div>
-        <div class="hero-card-info">
-          <div class="hero-card-row">
-            <span class="icon">📍</span>
-            <div><div class="label">Alamat</div><div class="val" id="heroCardAlamat">—</div></div>
+      <div class="panel">
+        <div class="form-success" id="profilStatus"></div>
+        <form id="profilForm">
+          <input type="hidden" id="profilId">
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="profilFotoUrl">URL Logo BERANI</label>
+              <input id="profilFotoUrl" placeholder="https://... (tempel link gambar logo)">
+              <div class="logo-preview-row">
+                <img id="profilFotoPreview" alt="Pratinjau logo" class="logo-preview">
+                <span class="meta">Logo ini yang tampil di navbar &amp; beranda situs. Kosongkan untuk pakai logo bawaan.</span>
+              </div>
+            </div>
+            <div class="field"><label for="profilJudul">Nama organisasi</label><input id="profilJudul" required></div>
+            <div class="field"><label for="profilTagline">Tagline</label><input id="profilTagline"></div>
+            <div class="field span-2"><label for="profilDeskripsi">Deskripsi singkat</label><textarea id="profilDeskripsi"></textarea></div>
+            <div class="field span-2"><label for="profilVisi">Visi</label><textarea id="profilVisi"></textarea></div>
+            <div class="field span-2">
+              <label for="profilMisi">Misi (pisahkan dengan tanda titik-koma ;)</label>
+              <textarea id="profilMisi" placeholder="Berbagi praktik baik secara rutin;Berkolaborasi lintas kelas"></textarea>
+            </div>
           </div>
-          <div class="hero-card-row">
-            <span class="icon">✉️</span>
-            <div><div class="label">Email</div><div class="val" id="heroCardEmail">—</div></div>
+          <button type="submit" class="btn btn-primary">Simpan Profil</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- Tab: Struktur Anggota ---------- -->
+    <section class="tab-panel" id="tab-anggota">
+      <div class="admin-header">
+        <div><h1>Struktur Anggota</h1><p>Kepala sekolah, koordinator, guru kelas, dan guru mata pelajaran yang tergabung di Kombel BERANI.</p></div>
+      </div>
+      <div class="panel">
+        <h2>Tambah / Ubah Anggota</h2>
+        <div class="form-success" id="anggotaStatus"></div>
+        <form id="anggotaForm">
+          <input type="hidden" id="anggotaId">
+          <div class="form-grid">
+            <div class="field"><label for="anggotaNama">Nama</label><input id="anggotaNama" required></div>
+            <div class="field"><label for="anggotaPeran">Peran (struktur AD/ART)</label>
+              <select id="anggotaPeran">
+                <option value="Penasihat / Kepala Sekolah">Penasihat / Kepala Sekolah</option>
+                <option value="Ketua Komunitas">Ketua Komunitas</option>
+                <option value="Sekretaris">Sekretaris</option>
+                <option value="Fasilitator / Narasumber">Fasilitator / Narasumber (bergilir)</option>
+                <option value="Anggota" selected>Anggota</option>
+              </select>
+            </div>
+            <div class="field"><label for="anggotaKelasMapel">Kelas / mapel diampu</label><input id="anggotaKelasMapel" placeholder="Kelas 4 / PJOK"></div>
+            <div class="field"><label for="anggotaUrutan">Urutan tampil</label><input id="anggotaUrutan" type="number" placeholder="1"></div>
+            <div class="field span-2"><p class="meta">Catatan: "Fasilitator / Narasumber" bertugas <strong>bergilir sesuai topik</strong> antarguru — ganti isian ini kalau giliran sudah berpindah. Isi "Anggota" satu baris per guru; boleh berkali-kali.</p></div>
+            <div class="field span-2"><label for="anggotaFotoUrl">URL foto (opsional)</label><input id="anggotaFotoUrl" placeholder="https://..."></div>
           </div>
-          <div class="hero-card-row">
-            <span class="icon">📱</span>
-            <div><div class="label">WhatsApp</div><div class="val" id="heroCardWhatsapp">—</div></div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Anggota</button>
+            <button type="button" class="btn btn-ghost" data-reset="anggota">Batal / Baru</button>
           </div>
-        </div>
+        </form>
       </div>
-    </div>
-  </div>
-</header>
-
-<section id="profil">
-  <div class="container about-grid">
-    <div>
-      <p class="eyebrow reveal">Tentang Kami</p>
-      <h2 class="reveal">Kenapa BERANI ada di SDN CITERE</h2>
-      <p class="reveal" id="profil-deskripsi" style="margin-top:1rem;color:rgba(32,36,31,0.75);"></p>
-      <div id="pillar-detail" style="margin-top:1.4rem;"></div>
-    </div>
-    <div class="reveal">
-      <p class="eyebrow">Visi Kami</p>
-      <p class="quote" id="profil-visi"></p>
-      <p class="eyebrow">Misi Kami</p>
-      <ul class="misi-list" id="profil-misi"></ul>
-    </div>
-  </div>
-</section>
-
-<section id="anggota">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Berdasarkan AD/ART Kombel</p>
-        <h2>Struktur Organisasi</h2>
+      <div class="panel">
+        <h2>Daftar Anggota</h2>
+        <table class="admin-table">
+          <thead><tr><th>Nama</th><th>Peran</th><th>Kelas/Mapel</th><th>Aksi</th></tr></thead>
+          <tbody id="anggotaTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
       </div>
-      <p>Bagan kepengurusan Komunitas Belajar BERANI SDN CITERE, dari penasihat hingga seluruh guru sebagai anggota.</p>
-    </div>
-    <div class="anggota-grid orgchart" id="anggota-grid"></div>
-  </div>
-</section>
+    </section>
 
-<section id="siklus">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Cara Kombel Bekerja</p>
-        <h2>Siklus Belajar BERANI</h2>
+    <!-- ---------- Tab: Siklus Belajar ---------- -->
+    <section class="tab-panel" id="tab-siklus">
+      <div class="admin-header">
+        <div><h1>Siklus Belajar Kombel</h1><p>Kegiatan pada tiap tahap siklus: Refleksi &rarr; Perencanaan &rarr; Implementasi &rarr; Evaluasi. Tahap ini yang ditampilkan sebagai diagram interaktif di beranda.</p></div>
       </div>
-      <p>Empat tahap yang terus berulang setiap periode — bukan proyek sekali jalan, tapi kebiasaan belajar bersama.</p>
-    </div>
-    <div class="siklus-wrap">
-      <nav class="siklus-stages" id="siklusStages" aria-label="Tahapan siklus belajar"></nav>
-      <div class="siklus-detail" id="siklusDetail"></div>
-    </div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Kegiatan Siklus</h2>
+        <div class="form-success" id="siklusStatus"></div>
+        <form id="siklusForm">
+          <input type="hidden" id="siklusId">
+          <div class="form-grid">
+            <div class="field"><label for="siklusTahap">Tahap</label>
+              <select id="siklusTahap" required>
+                <option value="refleksi">Refleksi</option>
+                <option value="perencanaan">Perencanaan</option>
+                <option value="implementasi">Implementasi</option>
+                <option value="evaluasi">Evaluasi</option>
+              </select>
+            </div>
+            <div class="field"><label for="siklusJudul">Judul kegiatan</label><input id="siklusJudul" required></div>
+            <div class="field"><label for="siklusTanggal">Periode</label><input id="siklusTanggal" placeholder="2026-01"></div>
+            <div class="field"><label for="siklusProgramTerkait">Program kerja terkait (opsional)</label><input id="siklusProgramTerkait" placeholder="Nama program kerja"></div>
+            <div class="field span-2"><label for="siklusDeskripsi">Deskripsi</label><textarea id="siklusDeskripsi"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Kegiatan</button>
+            <button type="button" class="btn btn-ghost" data-reset="siklus">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Kegiatan Siklus</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Tahap</th><th>Periode</th><th>Aksi</th></tr></thead>
+          <tbody id="siklusTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="jadwal">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Rutin dan Terjadwal</p>
-        <h2>Jadwal Kegiatan</h2>
+    <!-- ---------- Tab: Jadwal Kegiatan ---------- -->
+    <section class="tab-panel" id="tab-jadwal">
+      <div class="admin-header">
+        <div><h1>Jadwal Kegiatan</h1><p>Pertemuan rutin Kombel. Tanggal otomatis terpisah "Akan Datang" dan "Telah Lewat" di beranda.</p></div>
       </div>
-      <p>Pertemuan Kombel dimasukkan ke jam kerja efektif guru, bukan tambahan di luar jadwal.</p>
-    </div>
-    <div class="jadwal-list" id="jadwal-list"></div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Jadwal</h2>
+        <div class="form-success" id="jadwalStatus"></div>
+        <form id="jadwalForm">
+          <input type="hidden" id="jadwalId">
+          <div class="form-grid">
+            <div class="field"><label for="jadwalJudul">Judul kegiatan</label><input id="jadwalJudul" required></div>
+            <div class="field"><label for="jadwalTahap">Tahap siklus (opsional)</label>
+              <select id="jadwalTahap">
+                <option value="">— Tidak ditentukan —</option>
+                <option value="refleksi">Refleksi</option>
+                <option value="perencanaan">Perencanaan</option>
+                <option value="implementasi">Implementasi</option>
+                <option value="evaluasi">Evaluasi</option>
+              </select>
+            </div>
+            <div class="field"><label for="jadwalTanggal">Tanggal</label><input id="jadwalTanggal" type="date" required></div>
+            <div class="field"><label for="jadwalWaktu">Jam</label><input id="jadwalWaktu" type="time"></div>
+            <div class="field span-2"><label for="jadwalTempat">Tempat</label><input id="jadwalTempat" placeholder="Ruang Guru SDN CITERE"></div>
+            <div class="field span-2"><label for="jadwalCatatan">Catatan</label><textarea id="jadwalCatatan"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+            <button type="button" class="btn btn-ghost" data-reset="jadwal">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Jadwal</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Tempat</th><th>Aksi</th></tr></thead>
+          <tbody id="jadwalTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="notulen">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Hasil Kesepakatan Bersama</p>
-        <h2>Notulen Pertemuan Kombel</h2>
+    <!-- ---------- Tab: Notulen Kombel ---------- -->
+    <section class="tab-panel" id="tab-notulen">
+      <div class="admin-header">
+        <div><h1>Notulen Pertemuan Kombel</h1><p>Catatan resmi hasil diskusi & kesepakatan pertemuan — beda dengan Jurnal Mengajar yang bersifat pribadi per guru. Status "publish" akan tampil di website.</p></div>
       </div>
-      <p>Beda dengan jurnal mengajar pribadi — ini catatan resmi hasil diskusi dan kesepakatan dari pertemuan Kombel yang dihadiri banyak guru.</p>
-    </div>
-    <div class="notulen-list" id="notulen-list"></div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Notulen</h2>
+        <div class="form-success" id="notulenFormStatus"></div>
+        <form id="notulenForm">
+          <input type="hidden" id="notulenId">
+          <div class="form-grid">
+            <div class="field"><label for="notulenJudul">Judul pertemuan</label><input id="notulenJudul" required></div>
+            <div class="field"><label for="notulenTanggal">Tanggal</label><input id="notulenTanggal" type="date"></div>
+            <div class="field"><label for="notulenTahap">Tahap siklus (opsional)</label>
+              <select id="notulenTahap">
+                <option value="">— Tidak ditentukan —</option>
+                <option value="refleksi">Refleksi</option>
+                <option value="perencanaan">Perencanaan</option>
+                <option value="implementasi">Implementasi</option>
+                <option value="evaluasi">Evaluasi</option>
+              </select>
+            </div>
+            <div class="field"><label for="notulenPemimpin">Pemimpin rapat</label><input id="notulenPemimpin" placeholder="Bu Sinta"></div>
+            <div class="field"><label for="notulenStatusSel">Status</label>
+              <select id="notulenStatusSel"><option value="draft">Draft (belum tampil)</option><option value="publish">Publish (tampil di website)</option></select>
+            </div>
+            <div class="field span-2"><label for="notulenPeserta">Peserta hadir</label><input id="notulenPeserta" placeholder="Nama-nama dipisah koma"></div>
+            <div class="field span-2"><label for="notulenRingkasan">Ringkasan diskusi</label><textarea id="notulenRingkasan"></textarea></div>
+            <div class="field span-2"><label for="notulenKesepakatan">Kesepakatan / tindak lanjut</label><textarea id="notulenKesepakatan"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Notulen</button>
+            <button type="button" class="btn btn-ghost" data-reset="notulen">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Notulen</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="notulenTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="program">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Sedang &amp; Sudah Berjalan</p>
-        <h2>Program Kerja</h2>
+    <!-- ---------- Tab: Program Kerja ---------- -->
+    <section class="tab-panel" id="tab-program">
+      <div class="admin-header">
+        <div><h1>Program Kerja</h1><p>Kegiatan rutin dan proyek komunitas.</p></div>
       </div>
-      <p>Kegiatan rutin dan proyek bersama yang menghidupkan komunitas belajar guru.</p>
-    </div>
-    <div class="carousel">
-      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat program sebelumnya">‹</button>
-      <div class="card-grid" id="program-grid"></div>
-      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat program berikutnya">›</button>
-    </div>
-  </div>
-</section>
+      <div class="panel" id="programForm-panel">
+        <h2>Tambah / Ubah Program</h2>
+        <div class="form-success" id="programStatus"></div>
+        <form id="programForm">
+          <input type="hidden" id="programId">
+          <div class="form-grid">
+            <div class="field"><label for="programNama">Nama program</label><input id="programNama" required></div>
+            <div class="field"><label for="programKategori">Kategori</label><input id="programKategori" placeholder="Rutin / Kolaborasi / Semester"></div>
+            <div class="field"><label for="programStatusSel">Status</label>
+              <select id="programStatusSel"><option value="berjalan">Berjalan</option><option value="selesai">Selesai</option></select>
+            </div>
+            <div class="field"><label for="programTanggal">Tahun / periode</label><input id="programTanggal" placeholder="2026"></div>
+            <div class="field"><label for="programTahapSiklus">Tahap siklus terkait</label>
+              <select id="programTahapSiklus">
+                <option value="">— Tidak ditentukan —</option>
+                <option value="refleksi">Refleksi</option>
+                <option value="perencanaan">Perencanaan</option>
+                <option value="implementasi">Implementasi</option>
+                <option value="evaluasi">Evaluasi</option>
+              </select>
+            </div>
+            <div class="field span-2"><label for="programDeskripsi">Deskripsi</label><textarea id="programDeskripsi"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Program</button>
+            <button type="button" class="btn btn-ghost" data-reset="program">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Program Kerja</h2>
+        <table class="admin-table">
+          <thead><tr><th>Nama</th><th>Kategori</th><th>Periode</th><th>Aksi</th></tr></thead>
+          <tbody id="programTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="sumberdaya">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Saling Berbagi, Tak Perlu Mulai dari Nol</p>
-        <h2>Bank Sumber Daya</h2>
+    <!-- ---------- Tab: Bank Sumber Daya ---------- -->
+    <section class="tab-panel" id="tab-sumberdaya">
+      <div class="admin-header">
+        <div><h1>Bank Sumber Daya</h1><p>Modul ajar, ATP, asesmen, LKS, dan media ajar yang bisa saling dipakai guru. Tempel tautan file publik (Google Drive dengan akses "siapa saja yang punya link").</p></div>
       </div>
-      <p>Modul ajar, ATP, asesmen, dan LKS hasil kesepakatan Kombel — bebas diunduh dan dipakai guru SDN CITERE.</p>
-    </div>
-    <div class="sumberdaya-filter reveal">
-      <input type="text" id="sumberdayaCari" placeholder="Cari judul atau mapel…">
-      <select id="sumberdayaJenis"><option value="">Semua jenis</option></select>
-      <select id="sumberdayaKelas"><option value="">Semua kelas</option></select>
-    </div>
-    <div class="carousel">
-      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat sumber daya sebelumnya">‹</button>
-      <div class="sumberdaya-grid" id="sumberdaya-grid"></div>
-      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat sumber daya berikutnya">›</button>
-    </div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Sumber Daya</h2>
+        <div class="form-success" id="sumberdayaStatus"></div>
+        <form id="sumberdayaForm">
+          <input type="hidden" id="sumberdayaId">
+          <div class="form-grid">
+            <div class="field"><label for="sumberdayaJudul">Judul</label><input id="sumberdayaJudul" required></div>
+            <div class="field"><label for="sumberdayaJenis">Jenis</label>
+              <select id="sumberdayaJenis">
+                <option value="Modul Ajar">Modul Ajar</option>
+                <option value="ATP">ATP</option>
+                <option value="Asesmen">Asesmen</option>
+                <option value="LKS">LKS</option>
+                <option value="Media Ajar">Media Ajar</option>
+              </select>
+            </div>
+            <div class="field"><label for="sumberdayaMapel">Mata pelajaran</label><input id="sumberdayaMapel" placeholder="Matematika"></div>
+            <div class="field"><label for="sumberdayaKelas">Kelas</label><input id="sumberdayaKelas" placeholder="Kelas 4"></div>
+            <div class="field"><label for="sumberdayaPengunggah">Diunggah oleh</label><input id="sumberdayaPengunggah" placeholder="Bu Sinta"></div>
+            <div class="field"><label for="sumberdayaTanggal">Periode</label><input id="sumberdayaTanggal" placeholder="2026-01"></div>
+            <div class="field span-2"><label for="sumberdayaFileUrl">Tautan file (Google Drive publik, dsb.)</label><input id="sumberdayaFileUrl" placeholder="https://..."></div>
+            <div class="field span-2"><label for="sumberdayaKeterangan">Keterangan singkat</label><textarea id="sumberdayaKeterangan"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Sumber Daya</button>
+            <button type="button" class="btn btn-ghost" data-reset="sumberdaya">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Sumber Daya</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Jenis</th><th>Kelas / Mapel</th><th>Aksi</th></tr></thead>
+          <tbody id="sumberdayaTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="jurnal">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Praktik Baik Mingguan</p>
-        <h2>Jurnal Mengajar Guru</h2>
+    <!-- ---------- Tab: Jurnal ---------- -->
+    <section class="tab-panel" id="tab-jurnal">
+      <div class="admin-header">
+        <div><h1>Jurnal Mengajar Guru</h1><p>Tulisan reflektif guru. Status "publish" akan tampil di website.</p></div>
       </div>
-      <p>Catatan reflektif PRIBADI tiap guru dari ruang kelas masing-masing — beda dengan Notulen Kombel yang isinya kesepakatan bersama.</p>
-    </div>
-    <div class="carousel">
-      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat jurnal sebelumnya">‹</button>
-      <div class="jurnal-grid" id="jurnal-grid"></div>
-      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat jurnal berikutnya">›</button>
-    </div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Jurnal</h2>
+        <div class="form-success" id="jurnalStatus"></div>
+        <form id="jurnalForm">
+          <input type="hidden" id="jurnalId">
+          <div class="form-grid">
+            <div class="field"><label for="jurnalJudul">Judul</label><input id="jurnalJudul" required></div>
+            <div class="field"><label for="jurnalPenulis">Penulis</label><input id="jurnalPenulis" placeholder="Bu Sinta"></div>
+            <div class="field"><label for="jurnalTanggal">Tanggal</label><input id="jurnalTanggal" type="date"></div>
+            <div class="field"><label for="jurnalThumbnail">URL gambar sampul (opsional)</label><input id="jurnalThumbnail" placeholder="https://..."></div>
+            <div class="field"><label for="jurnalStatusSel">Status</label>
+              <select id="jurnalStatusSel"><option value="draft">Draft (belum tampil)</option><option value="publish">Publish (tampil di website)</option></select>
+            </div>
+            <div class="field span-2"><label for="jurnalRingkasan">Ringkasan singkat (untuk kartu di beranda)</label><textarea id="jurnalRingkasan"></textarea></div>
+            <div class="field span-2"><label for="jurnalIsi">Isi jurnal lengkap</label><textarea id="jurnalIsi" style="min-height:160px;"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Jurnal</button>
+            <button type="button" class="btn btn-ghost" data-reset="jurnal">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Jurnal</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Penulis</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody id="jurnalTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="galeri">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <p class="eyebrow">Dokumentasi</p>
-        <h2>Galeri Kegiatan</h2>
+    <!-- ---------- Tab: Galeri ---------- -->
+    <section class="tab-panel" id="tab-galeri">
+      <div class="admin-header">
+        <div><h1>Galeri Kegiatan</h1><p>Tempel URL gambar (misalnya dari Google Drive/Photos yang sudah dibagikan publik).</p></div>
       </div>
-      <p>Momen-momen dari kelas berbagi, lesson study, dan kegiatan komunitas lainnya.</p>
-    </div>
-    <div class="carousel">
-      <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Lihat galeri sebelumnya">‹</button>
-      <div class="galeri-grid" id="galeri-grid"></div>
-      <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Lihat galeri berikutnya">›</button>
-    </div>
-  </div>
-</section>
+      <div class="panel">
+        <h2>Tambah / Ubah Foto</h2>
+        <div class="form-success" id="galeriStatus"></div>
+        <form id="galeriForm">
+          <input type="hidden" id="galeriId">
+          <div class="form-grid">
+            <div class="field"><label for="galeriJudul">Judul foto</label><input id="galeriJudul"></div>
+            <div class="field"><label for="galeriTanggal">Tanggal</label><input id="galeriTanggal" type="date"></div>
+            <div class="field span-2"><label for="galeriUrl">URL gambar</label><input id="galeriUrl" required placeholder="https://..."></div>
+            <div class="field span-2"><label for="galeriKeterangan">Keterangan</label><textarea id="galeriKeterangan"></textarea></div>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn btn-primary">Simpan Foto</button>
+            <button type="button" class="btn btn-ghost" data-reset="galeri">Batal / Baru</button>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Daftar Foto</h2>
+        <table class="admin-table">
+          <thead><tr><th>Judul</th><th>Pratinjau</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody id="galeriTableBody"><tr><td colspan="4">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="kontak">
-  <div class="container">
-    <div class="kontak-wrap reveal">
-      <div>
-        <p class="eyebrow">Hubungi Kami</p>
-        <h2>Mari berkolaborasi dengan BERANI</h2>
-        <ul class="kontak-list" id="kontak-list"></ul>
+    <!-- ---------- Tab: Kontak ---------- -->
+    <section class="tab-panel" id="tab-kontak">
+      <div class="admin-header">
+        <div><h1>Kontak</h1><p>Informasi kontak yang tampil di bagian bawah website.</p></div>
       </div>
-      <div class="kontak-card">
-        <p class="eyebrow" style="color:var(--marigold)">Untuk Guru SDN CITERE</p>
-        <p>Ingin berbagi praktik baik atau punya usul kegiatan? Sampaikan langsung ke koordinator komunitas lewat WhatsApp atau email di samping.</p>
+      <div class="panel">
+        <div class="form-success" id="kontakStatus"></div>
+        <form id="kontakForm">
+          <input type="hidden" id="kontakId">
+          <div class="form-grid">
+            <div class="field span-2"><label for="kontakAlamat">Alamat</label><input id="kontakAlamat"></div>
+            <div class="field"><label for="kontakEmail">Email</label><input id="kontakEmail" type="email"></div>
+            <div class="field"><label for="kontakWhatsapp">WhatsApp</label><input id="kontakWhatsapp"></div>
+            <div class="field"><label for="kontakInstagram">Instagram</label><input id="kontakInstagram"></div>
+            <div class="field"><label for="kontakYoutube">YouTube (tautan channel)</label><input id="kontakYoutube" placeholder="https://youtube.com/@..."></div>
+            <div class="field"><label for="kontakTiktok">TikTok (tautan profil)</label><input id="kontakTiktok" placeholder="https://tiktok.com/@..."></div>
+            <div class="field"><label for="kontakMaps">Link Google Maps (opsional)</label><input id="kontakMaps"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Simpan Kontak</button>
+        </form>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<footer>
-  <div class="container">
-    <span>&copy; <span id="year"></span> BERANI — Komunitas Belajar Guru SDN CITERE</span>
-    <span>Berdedikasi · Rajin Berkolaborasi · Niat Menginspirasi</span>
-  </div>
-  <div class="container footer-credit">
-    <span>Website by UZM ver.XH082026</span>
-  </div>
-</footer>
+  </main>
+</div>
 
 <script src="../shared/config.js"></script>
 <script src="app.js"></script>

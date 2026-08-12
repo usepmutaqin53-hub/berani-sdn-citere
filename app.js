@@ -1,481 +1,535 @@
-/* BERANI — frontend app.js
-   Mengambil data dari Google Apps Script (GAS) dan merender ke halaman.
-   Jika GAS_API_URL belum diisi di shared/config.js, halaman tetap tampil
-   dengan data contoh (fallback) supaya desain tetap bisa dilihat. */
+/* BERANI — admin app.js
+   Login sederhana (password disimpan di Script Properties GAS) lalu
+   CRUD ke tiap resource lewat POST text/plain (menghindari CORS preflight). */
 
-const FALLBACK_DATA = {
-  profil: {
-    judul: 'BERANI',
-    tagline: 'Berdedikasi, Rajin Berkolaborasi, Niat Menginspirasi',
-    deskripsi: 'BERANI adalah komunitas belajar guru SDN CITERE — ruang berbagi praktik baik mengajar, berdiskusi, dan tumbuh bersama setiap pekan.',
-    visi: 'Menjadi komunitas guru yang aktif belajar dan saling menguatkan demi murid yang lebih baik.',
-    misi: 'Berbagi praktik baik secara rutin;Berkolaborasi lintas kelas dan mata pelajaran;Menginspirasi lewat karya dan jurnal mengajar',
-  },
-  program: [
-    { id: '1', nama: 'Kelas Berbagi Jumat', deskripsi: 'Sesi rutin berbagi praktik baik mengajar antar guru, sekali sepekan.', kategori: 'Rutin', status: 'berjalan', tanggal: '2026', tahapSiklus: 'evaluasi' },
-    { id: '2', nama: 'Lesson Study Kurikulum Merdeka', deskripsi: 'Observasi dan refleksi pembelajaran bersama untuk memperkuat implementasi Kurikulum Merdeka.', kategori: 'Kolaborasi', status: 'berjalan', tanggal: '2026', tahapSiklus: 'perencanaan' },
-    { id: '3', nama: 'Pameran Karya Murid', deskripsi: 'Menampilkan hasil karya belajar murid dari seluruh kelas di akhir semester.', kategori: 'Semester', status: 'selesai', tanggal: '2025', tahapSiklus: 'implementasi' },
-  ],
-  siklus: [
-    { id: '1', tahap: 'refleksi', judul: 'Analisis Rapor Pendidikan', deskripsi: 'Membedah hasil Rapor Pendidikan dan hasil belajar murid semester lalu untuk menemukan akar masalah pembelajaran di tiap kelas.', tanggal: '2026-01', programTerkait: 'Kelas Berbagi Jumat' },
-    { id: '2', tahap: 'perencanaan', judul: 'Menyusun Modul Ajar Bersama', deskripsi: 'Menyusun modul ajar, alur tujuan pembelajaran (ATP), dan asesmen secara kolaboratif berdasarkan hasil refleksi.', tanggal: '2026-01', programTerkait: 'Lesson Study Kurikulum Merdeka' },
-    { id: '3', tahap: 'implementasi', judul: 'Praktik di Kelas Masing-masing', deskripsi: 'Menerapkan hasil kesepakatan modul ajar dan strategi mengajar ke kelas masing-masing selama satu periode.', tanggal: '2026-02', programTerkait: 'Lesson Study Kurikulum Merdeka' },
-    { id: '4', tahap: 'evaluasi', judul: 'Berbagi Praktik Baik', deskripsi: 'Guru saling berbagi praktik baik dan kendala yang dihadapi di kelas, menjadi bahan refleksi periode berikutnya.', tanggal: '2026-02', programTerkait: 'Kelas Berbagi Jumat' },
-  ],
-  sumberdaya: [
-    { id: '1', judul: 'Modul Ajar Pecahan Kelas 4', jenis: 'Modul Ajar', mapel: 'Matematika', kelas: 'Kelas 4', fileUrl: '', pengunggah: 'Bu Sinta', keterangan: 'Modul ajar pecahan dengan pendekatan kontekstual, lengkap dengan LKPD.', tanggal: '2026-01' },
-    { id: '2', judul: 'ATP Bahasa Indonesia Semester 2', jenis: 'ATP', mapel: 'Bahasa Indonesia', kelas: 'Kelas 5', fileUrl: '', pengunggah: 'Pak Yusuf', keterangan: 'Alur tujuan pembelajaran semester 2, sudah diselaraskan hasil refleksi rapor pendidikan.', tanggal: '2026-01' },
-    { id: '3', judul: 'LKS Operasi Hitung Campuran', jenis: 'LKS', mapel: 'Matematika', kelas: 'Kelas 6', fileUrl: '', pengunggah: 'Bu Sinta', keterangan: 'Lembar kerja siswa untuk latihan operasi hitung campuran, siap cetak.', tanggal: '2026-02' },
-  ],
-  anggota: [
-    { id: '1', nama: 'Yayat Heryana', peran: 'Penasihat / Kepala Sekolah', kelasMapel: '', fotoUrl: '', urutan: 1 },
-    { id: '2', nama: 'Bu Sinta', peran: 'Ketua Komunitas', kelasMapel: 'Kelas 4', fotoUrl: '', urutan: 2 },
-    { id: '3', nama: 'Pak Yusuf', peran: 'Sekretaris', kelasMapel: 'Kelas 6', fotoUrl: '', urutan: 3 },
-    { id: '4', nama: 'Bu Rina', peran: 'Fasilitator / Narasumber', kelasMapel: 'PJOK', fotoUrl: '', urutan: 4 },
-    { id: '5', nama: 'Pak Dedi', peran: 'Anggota', kelasMapel: 'Pendidikan Agama', fotoUrl: '', urutan: 5 },
-  ],
-  jadwal: [
-    { id: '1', judul: 'Kelas Berbagi Jumat', tahap: 'evaluasi', tanggal: '2026-08-07', waktu: '13:00', tempat: 'Ruang Guru SDN CITERE', catatan: 'Berbagi praktik baik pekan ini, bawa contoh hasil kerja murid.' },
-    { id: '2', judul: 'Lesson Study: Observasi Kelas 5', tahap: 'implementasi', tanggal: '2026-08-12', waktu: '08:00', tempat: 'Kelas 5', catatan: 'Observasi pembelajaran, guru lain mengamati dari belakang kelas.' },
-    { id: '3', judul: 'Refleksi Rapor Pendidikan Semester 1', tahap: 'refleksi', tanggal: '2026-08-21', waktu: '13:00', tempat: 'Ruang Guru SDN CITERE', catatan: 'Membedah hasil Rapor Pendidikan bersama, siapkan laptop/HP masing-masing.' },
-  ],
-  notulen: [
-    { id: '1', judul: 'Notulen Refleksi Rapor Pendidikan Semester 1', tanggal: '2026-07-24', tahap: 'refleksi', pemimpin: 'Bu Sinta', pesertaHadir: 'Yayat Heryana, Bu Sinta, Pak Yusuf, Bu Rina, Pak Dedi', ringkasanDiskusi: 'Ditemukan capaian literasi kelas 3-4 masih di bawah target, sementara numerasi kelas 5-6 sudah membaik dibanding semester lalu.', kesepakatan: 'Tiap guru kelas menyusun 1 strategi literasi untuk dicoba pekan depan, dibahas lagi di Kelas Berbagi Jumat.' },
-  ],
-  jurnal: [
-    { id: '1', judul: 'Belajar Pecahan Lewat Kue', penulis: 'Bu Sinta', tanggal: '2026-07-10', ringkasan: 'Mencoba media kue untuk menjelaskan pecahan ke kelas 4, murid jadi lebih paham konsep bagian dari keseluruhan.', thumbnailUrl: '' },
-    { id: '2', judul: 'Refleksi Minggu Asesmen', penulis: 'Pak Yusuf', tanggal: '2026-07-03', ringkasan: 'Catatan reflektif tentang asesmen formatif kelas 6 dan penyesuaian rencana pembelajaran pekan berikutnya.', thumbnailUrl: '' },
-  ],
-  galeri: [],
-  kontak: { alamat: 'SDN CITERE', email: 'beranisdncitere@gmail.com', whatsapp: '08123456789', instagram: '@beranisdncitere', youtube: '', tiktok: '', mapsUrl: '' },
-};
+const SESSION_KEY = 'berani_admin_password';
 
-const PILLARS = [
-  { letter: 'B', word: 'Berdedikasi', desc: 'Hadir dan bertanggung jawab penuh untuk murid, setiap hari.' },
-  { letter: 'E', word: 'Elemen dasar', desc: 'Menguatkan fondasi mengajar: rencana, refleksi, dan asesmen.' },
-  { letter: 'R', word: 'Rajin berkolaborasi', desc: 'Saling belajar lintas kelas lewat diskusi dan lesson study.' },
-  { letter: 'A', word: 'Aktif berbagi', desc: 'Membagikan praktik baik lewat jurnal mengajar mingguan.' },
-  { letter: 'N', word: 'Niat menginspirasi', desc: 'Karya kecil di kelas, dampak besar bagi guru lain.' },
-  { letter: 'I', word: 'Ikhlas bertumbuh', desc: 'Terbuka pada masukan dan terus memperbaiki cara mengajar.' },
-];
+function apiUrl() { return BERANI_CONFIG.GAS_API_URL; }
 
-const SIKLUS_STAGES = [
-  { key: 'refleksi', no: '01', label: 'Refleksi', icon: '🔍', desc: 'Menganalisis Rapor Pendidikan dan hasil belajar murid untuk menemukan akar masalah pembelajaran.' },
-  { key: 'perencanaan', no: '02', label: 'Perencanaan', icon: '🗂️', desc: 'Menyusun modul ajar, alur tujuan pembelajaran (ATP), dan asesmen bersama-sama.' },
-  { key: 'implementasi', no: '03', label: 'Implementasi', icon: '🏫', desc: 'Mempraktikkan hasil diskusi ke dalam kelas masing-masing.' },
-  { key: 'evaluasi', no: '04', label: 'Evaluasi', icon: '🔁', desc: 'Saling berbagi praktik baik dan mereview kendala, lalu kembali ke tahap Refleksi.' },
-];
+function isConfigured() {
+  return apiUrl() && !apiUrl().startsWith('TEMPEL_URL');
+}
 
-async function fetchBerani() {
-  const url = BERANI_CONFIG.GAS_API_URL;
-  if (!url || url.startsWith('TEMPEL_URL')) return FALLBACK_DATA;
+async function apiPost(body) {
+  const res = await fetch(apiUrl(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari CORS preflight
+    body: JSON.stringify(body),
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'Terjadi kesalahan.');
+  return json.data;
+}
+
+async function apiGet(resource) {
+  const res = await fetch(apiUrl() + '?action=get&resource=' + encodeURIComponent(resource));
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'Terjadi kesalahan.');
+  return json.data;
+}
+
+function getPassword() { return sessionStorage.getItem(SESSION_KEY); }
+function setPassword(p) { sessionStorage.setItem(SESSION_KEY, p); }
+function clearPassword() { sessionStorage.removeItem(SESSION_KEY); }
+
+/* ---------------- Login ---------------- */
+async function handleLogin(e) {
+  e.preventDefault();
+  const password = document.getElementById('loginPassword').value;
+  const errorBox = document.getElementById('loginError');
+  errorBox.classList.remove('is-visible');
+
+  if (!isConfigured()) {
+    errorBox.textContent = 'GAS_API_URL belum diisi di shared/config.js. Lihat README.md.';
+    errorBox.classList.add('is-visible');
+    return;
+  }
+
   try {
-    const res = await fetch(url + '?action=getAll');
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error);
-    // API sudah tersambung dan berhasil dibaca: pakai data apa adanya,
-    // termasuk kalau memang kosong (mis. sudah dihapus lewat admin/spreadsheet).
-    // FALLBACK_DATA di sini hanya jaga-jaga kalau key-nya benar-benar tidak ada
-    // di response (bukan sebagai pengganti data kosong).
-    return {
-      profil: json.data.profil || FALLBACK_DATA.profil,
-      program: json.data.program || [],
-      siklus: json.data.siklus || [],
-      sumberdaya: json.data.sumberdaya || [],
-      anggota: json.data.anggota || [],
-      jadwal: json.data.jadwal || [],
-      jurnal: json.data.jurnal || [],
-      notulen: json.data.notulen || [],
-      galeri: json.data.galeri || [],
-      kontak: json.data.kontak || FALLBACK_DATA.kontak,
-    };
+    await apiPost({ action: 'login', password: password });
+    setPassword(password);
+    showDashboard();
   } catch (err) {
-    console.warn('Gagal memuat data dari GAS, memakai data contoh.', err);
-    return FALLBACK_DATA;
+    errorBox.textContent = err.message;
+    errorBox.classList.add('is-visible');
   }
 }
 
-function renderSpineAndPillars() {
-  const spine = document.getElementById('spine');
-  const pillarWrap = document.getElementById('pillars');
-  spine.innerHTML = PILLARS.map(function (p, i) {
-    return '<button class="letter-' + i + '" data-target="pillar-' + i + '" aria-label="' + p.word + '">' + p.letter + '</button>';
-  }).join('');
-  pillarWrap.innerHTML = PILLARS.slice(0, 3).map(function (p, i) {
-    return '<div class="pillar-card letter-' + i + '" id="pillar-' + i + '"><div class="letter letter-' + i + '">' + p.letter + '</div><h3>' + p.word + '</h3><p>' + p.desc + '</p></div>';
-  }).join('');
+function logout() {
+  clearPassword();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'grid';
+}
 
-  spine.querySelectorAll('button').forEach(function (btn, i) {
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'grid';
+  loadAllTabs();
+}
+
+/* ---------------- Tabs ---------------- */
+function setupTabs() {
+  const buttons = document.querySelectorAll('.side-nav button');
+  buttons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      spine.querySelectorAll('button').forEach(function (b) { b.classList.remove('is-active'); });
+      buttons.forEach(function (b) { b.classList.remove('is-active'); });
       btn.classList.add('is-active');
-      const targetPillar = PILLARS[i];
-      document.getElementById('pillar-detail').innerHTML =
-        '<div class="pillar-card is-active letter-' + i + '"><div class="letter letter-' + i + '">' + targetPillar.letter + '</div><h3>' + targetPillar.word + '</h3><p>' + targetPillar.desc + '</p></div>';
+      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('is-active'); });
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('is-active');
     });
   });
 }
 
-function renderSiklus(list, activeKey) {
-  const stagesWrap = document.getElementById('siklusStages');
-  const detailWrap = document.getElementById('siklusDetail');
-  const current = activeKey || SIKLUS_STAGES[0].key;
-
-  stagesWrap.innerHTML = SIKLUS_STAGES.map(function (s, i) {
-    const isActive = s.key === current ? ' is-active' : '';
-    return '<button class="siklus-stage stage-' + i + isActive + '" data-tahap="' + s.key + '">' +
-      '<span class="stage-no">' + s.no + '</span>' +
-      '<span class="stage-icon">' + s.icon + '</span>' +
-      '<span class="stage-label">' + s.label + '</span>' +
-      '</button>';
-  }).join('');
-
-  const stageInfo = SIKLUS_STAGES.find(function (s) { return s.key === current; });
-  const items = list.filter(function (it) { return it.tahap === current; });
-
-  detailWrap.innerHTML =
-    '<div class="siklus-detail-head">' +
-    '<h3>' + escapeHtml(stageInfo.label) + '</h3>' +
-    '<p>' + escapeHtml(stageInfo.desc) + '</p>' +
-    '</div>' +
-    (items.length
-      ? '<div class="siklus-items">' + items.map(function (it) {
-          return '<div class="siklus-item">' +
-            '<h4>' + escapeHtml(it.judul) + '</h4>' +
-            '<p>' + escapeHtml(it.deskripsi || '') + '</p>' +
-            '<div class="meta">' +
-            (it.tanggal ? escapeHtml(formatTanggal(it.tanggal) || String(it.tanggal)) : '') +
-            (it.programTerkait ? ' · Program: ' + escapeHtml(it.programTerkait) : '') +
-            '</div></div>';
-        }).join('') + '</div>'
-      : '<div class="empty-state">Belum ada kegiatan untuk tahap ini.</div>');
-
-  stagesWrap.querySelectorAll('.siklus-stage').forEach(function (btn) {
-    btn.addEventListener('click', function () { renderSiklus(list, btn.dataset.tahap); });
-  });
+async function loadAllTabs() {
+  await Promise.all([
+    loadProfil(),
+    loadKontak(),
+    loadList('program', 'ProgramKerja', renderProgramRow),
+    loadList('anggota', 'Anggota', renderAnggotaRow),
+    loadList('siklus', 'SiklusKegiatan', renderSiklusRow),
+    loadList('jadwal', 'Jadwal', renderJadwalRow),
+    loadList('notulen', 'NotulenKombel', renderNotulenRow),
+    loadList('sumberdaya', 'SumberDaya', renderSumberDayaRow),
+    loadList('jurnal', 'Jurnal', renderJurnalRow),
+    loadList('galeri', 'Galeri', renderGaleriRow),
+  ]);
 }
 
-const ORG_ROLES = [
-  { key: 'penasihat', match: /penasihat|kepala sekolah/i, label: 'Penasihat / Kepala Sekolah', duty: 'Memberikan arahan, dukungan kebijakan, serta memfasilitasi kebutuhan operasional komunitas di lingkungan sekolah.' },
-  { key: 'ketua', match: /ketua/i, label: 'Ketua Komunitas', duty: 'Memimpin jalannya organisasi komunitas belajar serta mengkoordinasikan seluruh program kerja dan jadwal pertemuan rutin bersama anggota.' },
-  { key: 'sekretaris', match: /sekretaris/i, label: 'Sekretaris', duty: 'Mengelola administrasi komunitas, mencatat hasil notulensi setiap pertemuan, serta mendokumentasikan lembar refleksi kegiatan.' },
-  { key: 'fasilitator', match: /fasilitator|narasumber/i, label: 'Fasilitator / Narasumber', sub: 'Bergilir sesuai topik antarguru', duty: 'Memimpin sesi diskusi, membagikan praktik baik, atau memaparkan materi sesuai topik yang dijadwalkan, secara bergantian antarguru.' },
-  { key: 'anggota', match: /.*/, label: 'Anggota Komunitas', sub: 'Seluruh guru aktif SDN CITERE', duty: 'Berpartisipasi aktif dalam kegiatan diskusi, bedah masalah pembelajaran, dan observasi kelas timbal-balik (peer observation).' },
-];
-
-function initials(name) {
-  return String(name || '')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(function (w) { return w[0]; })
-    .join('')
-    .toUpperCase();
+/* ---------------- Profil (singleton) ---------------- */
+function updateLogoPreview(url) {
+  const src = url || BERANI_CONFIG.LOGO_URL;
+  if (!src) return;
+  document.getElementById('profilFotoPreview').src = src;
+  document.getElementById('sideLogo').src = src;
 }
 
-function groupByRole(list) {
-  const buckets = { penasihat: [], ketua: [], sekretaris: [], fasilitator: [], anggota: [] };
-  list.forEach(function (a) {
-    const role = ORG_ROLES.find(function (r) { return r.key !== 'anggota' && r.match.test(a.peran || ''); });
-    buckets[role ? role.key : 'anggota'].push(a);
-  });
-  return buckets;
+async function loadProfil() {
+  try {
+    const rows = await apiGet('Profil');
+    const p = rows[0] || {};
+    document.getElementById('profilId').value = p.id || '';
+    document.getElementById('profilFotoUrl').value = p.fotoUrl || '';
+    updateLogoPreview(p.fotoUrl);
+    document.getElementById('profilJudul').value = p.judul || '';
+    document.getElementById('profilTagline').value = p.tagline || '';
+    document.getElementById('profilDeskripsi').value = p.deskripsi || '';
+    document.getElementById('profilVisi').value = p.visi || '';
+    document.getElementById('profilMisi').value = p.misi || '';
+  } catch (err) { flashStatus('profilStatus', err.message, true); }
 }
 
-function renderAnggota(list) {
-  const wrap = document.getElementById('anggota-grid');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Struktur anggota belum ditambahkan.</div>';
-    return;
-  }
-  const bySort = list.slice().sort(function (a, b) { return (Number(a.urutan) || 999) - (Number(b.urutan) || 999); });
-  const buckets = groupByRole(bySort);
-
-  function roleMeta(key) { return ORG_ROLES.find(function (r) { return r.key === key; }); }
-
-  function personNode(a) {
-    const avatar = a.fotoUrl
-      ? '<img src="' + a.fotoUrl + '" alt="' + escapeHtml(a.nama) + '">'
-      : '<span>' + escapeHtml(initials(a.nama)) + '</span>';
-    return '<div class="anggota-avatar">' + avatar + '</div><h4>' + escapeHtml(a.nama) + '</h4>' +
-      (a.kelasMapel ? '<div class="meta">' + escapeHtml(a.kelasMapel) + '</div>' : '');
-  }
-
-  function tierNode(key, people) {
-    const meta = roleMeta(key);
-    const inner = people.length
-      ? people.map(function (a) { return '<div class="orgchart-node reveal">' + personNode(a) + '</div>'; }).join('')
-      : '<div class="orgchart-node orgchart-node-empty reveal"><div class="anggota-avatar"><span>?</span></div><h4>Belum ditentukan</h4></div>';
-    return '<div class="orgchart-tier">' +
-      '<p class="orgchart-role-label">' + escapeHtml(meta.label) + (meta.sub ? ' <span>· ' + escapeHtml(meta.sub) + '</span>' : '') + '</p>' +
-      '<div class="orgchart-nodes">' + inner + '</div>' +
-      '<p class="orgchart-duty">' + escapeHtml(meta.duty) + '</p>' +
-      '</div>';
-  }
-
-  const connector = '<div class="orgchart-connector"></div>';
-
-  wrap.innerHTML =
-    tierNode('penasihat', buckets.penasihat) + connector +
-    tierNode('ketua', buckets.ketua) + connector +
-    '<div class="orgchart-branch">' +
-      tierNode('sekretaris', buckets.sekretaris) +
-      tierNode('fasilitator', buckets.fasilitator) +
-    '</div>' + connector +
-    tierNode('anggota', buckets.anggota);
-
-  observeReveal();
+async function saveProfil(e) {
+  e.preventDefault();
+  const id = document.getElementById('profilId').value;
+  const data = {
+    fotoUrl: document.getElementById('profilFotoUrl').value,
+    judul: document.getElementById('profilJudul').value,
+    tagline: document.getElementById('profilTagline').value,
+    deskripsi: document.getElementById('profilDeskripsi').value,
+    visi: document.getElementById('profilVisi').value,
+    misi: document.getElementById('profilMisi').value,
+  };
+  try {
+    if (id) {
+      await apiPost({ action: 'update', resource: 'profil', password: getPassword(), id: id, data: data });
+    } else {
+      const res = await apiPost({ action: 'create', resource: 'profil', password: getPassword(), data: data });
+      document.getElementById('profilId').value = res.id;
+    }
+    flashStatus('profilStatus', 'Profil tersimpan.', false);
+  } catch (err) { flashStatus('profilStatus', err.message, true); }
 }
 
-function renderProfil(profil) {
-  document.getElementById('profil-tagline').textContent = profil.tagline || '';
-  document.getElementById('profil-deskripsi').textContent = profil.deskripsi || '';
-  document.getElementById('profil-visi').textContent = profil.visi || '';
-  const misiWrap = document.getElementById('profil-misi');
-  const misiItems = (profil.misi || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean);
-  misiWrap.innerHTML = misiItems.map(function (m) { return '<li>' + escapeHtml(m) + '</li>'; }).join('');
-
-  document.getElementById('heroCardTitle').textContent = profil.judul || BERANI_CONFIG.NAMA_ORGANISASI;
-
-  // Logo diutamakan dari Profil.fotoUrl (diatur lewat admin), baru fallback
-  // ke LOGO_URL bawaan di shared/config.js kalau belum diisi.
-  const logoUrl = profil.fotoUrl || BERANI_CONFIG.LOGO_URL;
-  if (logoUrl) {
-    document.getElementById('brandLogo').src = logoUrl;
-    document.getElementById('heroEmblem').src = logoUrl;
-  }
+/* ---------------- Kontak (singleton) ---------------- */
+async function loadKontak() {
+  try {
+    const rows = await apiGet('Kontak');
+    const k = rows[0] || {};
+    document.getElementById('kontakId').value = k.id || '';
+    document.getElementById('kontakAlamat').value = k.alamat || '';
+    document.getElementById('kontakEmail').value = k.email || '';
+    document.getElementById('kontakWhatsapp').value = k.whatsapp || '';
+    document.getElementById('kontakInstagram').value = k.instagram || '';
+    document.getElementById('kontakYoutube').value = k.youtube || '';
+    document.getElementById('kontakTiktok').value = k.tiktok || '';
+    document.getElementById('kontakMaps').value = k.mapsUrl || '';
+  } catch (err) { flashStatus('kontakStatus', err.message, true); }
 }
 
-function renderJadwal(list) {
-  const wrap = document.getElementById('jadwal-list');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Belum ada jadwal kegiatan.</div>';
-    return;
-  }
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const sorted = list.slice().sort(function (a, b) {
-    return String(a.tanggal).localeCompare(String(b.tanggal));
-  });
-  const akanDatang = sorted.filter(function (j) { return String(j.tanggal) >= todayStr; });
-  const telahLewat = sorted.filter(function (j) { return String(j.tanggal) < todayStr; }).reverse();
-
-  function itemHtml(j) {
-    const stage = SIKLUS_STAGES.find(function (s) { return s.key === j.tahap; });
-    return '<div class="jadwal-item reveal">' +
-      '<div class="jadwal-date">' +
-      '<span class="jadwal-date-day">' + escapeHtml((formatTanggal(j.tanggal) || '').split(' ')[0] || '') + '</span>' +
-      '<span class="jadwal-date-rest">' + escapeHtml((formatTanggal(j.tanggal) || '').split(' ').slice(1).join(' ')) + '</span>' +
-      '</div>' +
-      '<div class="jadwal-body">' +
-      (stage ? '<span class="status-pill stage-pill">' + stage.icon + ' ' + escapeHtml(stage.label) + '</span>' : '') +
-      '<h3>' + escapeHtml(j.judul) + '</h3>' +
-      '<div class="meta">' + (j.waktu ? escapeHtml(j.waktu) + ' · ' : '') + escapeHtml(j.tempat || '') + '</div>' +
-      (j.catatan ? '<p>' + escapeHtml(j.catatan) + '</p>' : '') +
-      '</div></div>';
-  }
-
-  let html = '';
-  if (akanDatang.length) {
-    html += '<h3 class="jadwal-subhead">Akan Datang</h3><div class="jadwal-group">' + akanDatang.map(itemHtml).join('') + '</div>';
-  }
-  if (telahLewat.length) {
-    html += '<h3 class="jadwal-subhead jadwal-subhead-past">Telah Lewat</h3><div class="jadwal-group jadwal-group-past">' + telahLewat.map(itemHtml).join('') + '</div>';
-  }
-  wrap.innerHTML = html;
-  observeReveal();
+async function saveKontak(e) {
+  e.preventDefault();
+  const id = document.getElementById('kontakId').value;
+  const data = {
+    alamat: document.getElementById('kontakAlamat').value,
+    email: document.getElementById('kontakEmail').value,
+    whatsapp: document.getElementById('kontakWhatsapp').value,
+    instagram: document.getElementById('kontakInstagram').value,
+    youtube: document.getElementById('kontakYoutube').value,
+    tiktok: document.getElementById('kontakTiktok').value,
+    mapsUrl: document.getElementById('kontakMaps').value,
+  };
+  try {
+    if (id) {
+      await apiPost({ action: 'update', resource: 'kontak', password: getPassword(), id: id, data: data });
+    } else {
+      const res = await apiPost({ action: 'create', resource: 'kontak', password: getPassword(), data: data });
+      document.getElementById('kontakId').value = res.id;
+    }
+    flashStatus('kontakStatus', 'Kontak tersimpan.', false);
+  } catch (err) { flashStatus('kontakStatus', err.message, true); }
 }
 
-function refreshCarousel(id) {
-  const track = document.getElementById(id);
-  if (!track) return;
-  const wrap = track.closest('.carousel');
-  if (!wrap) return;
-  const prevBtn = wrap.querySelector('.carousel-prev');
-  const nextBtn = wrap.querySelector('.carousel-next');
-  const scrollable = track.scrollWidth > track.clientWidth + 4;
-  wrap.classList.toggle('has-overflow', scrollable);
-  if (prevBtn) prevBtn.disabled = track.scrollLeft <= 2;
-  if (nextBtn) nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
-}
-
-function setupCarousel(id) {
-  const track = document.getElementById(id);
-  if (!track) return;
-  const wrap = track.closest('.carousel');
-  if (!wrap || wrap.dataset.carouselReady) return;
-  wrap.dataset.carouselReady = '1';
-  const prevBtn = wrap.querySelector('.carousel-prev');
-  const nextBtn = wrap.querySelector('.carousel-next');
-  if (prevBtn) prevBtn.addEventListener('click', function () {
-    track.scrollBy({ left: -track.clientWidth * 0.85, behavior: 'smooth' });
-  });
-  if (nextBtn) nextBtn.addEventListener('click', function () {
-    track.scrollBy({ left: track.clientWidth * 0.85, behavior: 'smooth' });
-  });
-  track.addEventListener('scroll', function () { refreshCarousel(id); });
-  window.addEventListener('resize', function () { refreshCarousel(id); });
-}
-
-function renderProgram(list) {
-  const wrap = document.getElementById('program-grid');
-  setupCarousel('program-grid');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Belum ada program kerja yang ditambahkan.</div>';
-    refreshCarousel('program-grid');
-    return;
-  }
-  wrap.innerHTML = list.map(function (p) {
-    const statusClass = p.status === 'selesai' ? 'selesai' : '';
-    const stage = SIKLUS_STAGES.find(function (s) { return s.key === p.tahapSiklus; });
-    return '<div class="program-card reveal">' +
-      '<span class="status-pill ' + statusClass + '">' + escapeHtml(p.status || 'berjalan') + '</span>' +
-      (stage ? '<span class="status-pill stage-pill">' + stage.icon + ' ' + escapeHtml(stage.label) + '</span>' : '') +
-      '<h3>' + escapeHtml(p.nama) + '</h3>' +
-      '<p>' + escapeHtml(p.deskripsi || '') + '</p>' +
-      '<div class="meta">' + escapeHtml(p.kategori || '') + (p.tanggal ? ' · ' + escapeHtml(String(p.tanggal)) : '') + '</div>' +
-      '</div>';
-  }).join('');
-  observeReveal();
-  refreshCarousel('program-grid');
-}
-
-const JENIS_ICON = { 'Modul Ajar': '📘', 'ATP': '🗺️', 'Asesmen': '✅', 'LKS': '📄', 'Media Ajar': '🎬' };
-
-function renderSumberDaya(list) {
-  const wrap = document.getElementById('sumberdaya-grid');
-  setupCarousel('sumberdaya-grid');
-  const cariEl = document.getElementById('sumberdayaCari');
-  const jenisEl = document.getElementById('sumberdayaJenis');
-  const kelasEl = document.getElementById('sumberdayaKelas');
-
-  const jenisSet = Array.from(new Set(list.map(function (r) { return r.jenis; }).filter(Boolean))).sort();
-  const kelasSet = Array.from(new Set(list.map(function (r) { return r.kelas; }).filter(Boolean))).sort();
-  jenisEl.innerHTML = '<option value="">Semua jenis</option>' + jenisSet.map(function (j) { return '<option value="' + escapeHtml(j) + '">' + escapeHtml(j) + '</option>'; }).join('');
-  kelasEl.innerHTML = '<option value="">Semua kelas</option>' + kelasSet.map(function (k) { return '<option value="' + escapeHtml(k) + '">' + escapeHtml(k) + '</option>'; }).join('');
-
-  function draw() {
-    const q = cariEl.value.trim().toLowerCase();
-    const jenisFilter = jenisEl.value;
-    const kelasFilter = kelasEl.value;
-    const filtered = list.filter(function (r) {
-      const matchQ = !q || (r.judul || '').toLowerCase().indexOf(q) !== -1 || (r.mapel || '').toLowerCase().indexOf(q) !== -1;
-      const matchJenis = !jenisFilter || r.jenis === jenisFilter;
-      const matchKelas = !kelasFilter || r.kelas === kelasFilter;
-      return matchQ && matchJenis && matchKelas;
-    });
-
-    if (!filtered.length) {
-      wrap.innerHTML = '<div class="empty-state">' + (list.length ? 'Tidak ada sumber daya yang cocok dengan pencarian.' : 'Belum ada sumber daya yang dibagikan. Admin bisa menambahkan lewat panel admin.') + '</div>';
-      refreshCarousel('sumberdaya-grid');
+/* ---------------- Generic list resources: Program, Jurnal, Galeri ---------------- */
+async function loadList(key, resourceName, rowRenderer) {
+  const tbody = document.getElementById(key + 'TableBody');
+  try {
+    const rows = await apiGet(resourceName);
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5">Belum ada data.</td></tr>';
       return;
     }
-    wrap.innerHTML = filtered.map(function (r) {
-      const icon = JENIS_ICON[r.jenis] || '📎';
-      const downloadBtn = r.fileUrl
-        ? '<a href="' + r.fileUrl + '" target="_blank" rel="noopener" class="btn btn-teal btn-sm">Unduh</a>'
-        : '<span class="meta">Tautan belum ditambahkan</span>';
-      return '<div class="sumberdaya-card reveal">' +
-        '<div class="sumberdaya-icon">' + icon + '</div>' +
-        '<div class="sumberdaya-body">' +
-        '<span class="status-pill">' + escapeHtml(r.jenis || '') + '</span>' +
-        '<h3>' + escapeHtml(r.judul) + '</h3>' +
-        '<p>' + escapeHtml(r.keterangan || '') + '</p>' +
-        '<div class="meta">' + escapeHtml(r.mapel || '') + (r.kelas ? ' · ' + escapeHtml(r.kelas) : '') + (r.pengunggah ? ' · oleh ' + escapeHtml(r.pengunggah) : '') + '</div>' +
-        '<div class="sumberdaya-action">' + downloadBtn + '</div>' +
-        '</div></div>';
-    }).join('');
-    observeReveal();
-    refreshCarousel('sumberdaya-grid');
+    tbody.innerHTML = rows.map(rowRenderer).join('');
+    tbody.querySelectorAll('[data-edit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { fillFormFromRow(key, JSON.parse(btn.dataset.edit)); });
+    });
+    tbody.querySelectorAll('[data-delete]').forEach(function (btn) {
+      btn.addEventListener('click', function () { deleteItem(key, resourceName, btn.dataset.delete); });
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="5">' + escapeHtml(err.message) + '</td></tr>';
   }
-
-  cariEl.addEventListener('input', draw);
-  jenisEl.addEventListener('change', draw);
-  kelasEl.addEventListener('change', draw);
-  draw();
 }
 
-function renderNotulen(list) {
-  const wrap = document.getElementById('notulen-list');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Belum ada notulen pertemuan yang dipublikasikan.</div>';
-    return;
+function renderProgramRow(p) {
+  return '<tr><td>' + escapeHtml(p.nama) + '<div class="badge">' + escapeHtml(p.status) + '</div></td>' +
+    '<td>' + escapeHtml(p.kategori || '') + '</td>' +
+    '<td>' + escapeHtml(String(p.tanggal || '')) + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(p)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + p.id + '">Hapus</button></td></tr>';
+}
+
+function renderAnggotaRow(a) {
+  return '<tr><td>' + escapeHtml(a.nama) + '</td>' +
+    '<td><div class="badge">' + escapeHtml(a.peran || '') + '</div></td>' +
+    '<td>' + escapeHtml(a.kelasMapel || '') + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(a)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + a.id + '">Hapus</button></td></tr>';
+}
+
+function renderNotulenRow(n) {
+  return '<tr><td>' + escapeHtml(n.judul) + '</td>' +
+    '<td>' + escapeHtml(String(n.tanggal || '')) + '</td>' +
+    '<td><div class="badge">' + escapeHtml(n.status || 'draft') + '</div></td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(n)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + n.id + '">Hapus</button></td></tr>';
+}
+
+function renderJadwalRow(j) {
+  return '<tr><td>' + escapeHtml(j.judul) + '</td>' +
+    '<td>' + escapeHtml(String(j.tanggal || '')) + (j.waktu ? ' ' + escapeHtml(j.waktu) : '') + '</td>' +
+    '<td>' + escapeHtml(j.tempat || '') + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(j)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + j.id + '">Hapus</button></td></tr>';
+}
+
+const TAHAP_LABEL = { refleksi: 'Refleksi', perencanaan: 'Perencanaan', implementasi: 'Implementasi', evaluasi: 'Evaluasi' };
+
+function renderSiklusRow(s) {
+  return '<tr><td>' + escapeHtml(s.judul) + '</td>' +
+    '<td><div class="badge">' + escapeHtml(TAHAP_LABEL[s.tahap] || s.tahap || '') + '</div></td>' +
+    '<td>' + escapeHtml(String(s.tanggal || '')) + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(s)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + s.id + '">Hapus</button></td></tr>';
+}
+
+function renderSumberDayaRow(r) {
+  return '<tr><td>' + escapeHtml(r.judul) + '<div class="badge">' + escapeHtml(r.jenis || '') + '</div></td>' +
+    '<td>' + escapeHtml(r.jenis || '') + '</td>' +
+    '<td>' + escapeHtml(r.kelas || '') + (r.mapel ? ' · ' + escapeHtml(r.mapel) : '') + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(r)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + r.id + '">Hapus</button></td></tr>';
+}
+
+function renderJurnalRow(j) {
+  return '<tr><td>' + escapeHtml(j.judul) + '<div class="badge">' + escapeHtml(j.status || 'draft') + '</div></td>' +
+    '<td>' + escapeHtml(j.penulis || '') + '</td>' +
+    '<td>' + escapeHtml(String(j.tanggal || '')) + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(j)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + j.id + '">Hapus</button></td></tr>';
+}
+
+function renderGaleriRow(g) {
+  return '<tr><td>' + escapeHtml(g.judul || '') + '</td>' +
+    '<td><img src="' + g.url + '" alt="" style="width:60px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.opacity=0.2"></td>' +
+    '<td>' + escapeHtml(String(g.tanggal || '')) + '</td>' +
+    '<td class="row-actions">' +
+    '<button class="btn btn-ghost btn-sm" data-edit=\'' + escapeAttr(JSON.stringify(g)) + '\'>Ubah</button>' +
+    '<button class="btn btn-danger btn-sm" data-delete="' + g.id + '">Hapus</button></td></tr>';
+}
+
+function fillFormFromRow(key, row) {
+  if (key === 'program') {
+    document.getElementById('programId').value = row.id;
+    document.getElementById('programNama').value = row.nama || '';
+    document.getElementById('programDeskripsi').value = row.deskripsi || '';
+    document.getElementById('programKategori').value = row.kategori || '';
+    document.getElementById('programStatusSel').value = row.status || 'berjalan';
+    document.getElementById('programTanggal').value = row.tanggal || '';
+    document.getElementById('programTahapSiklus').value = row.tahapSiklus || '';
+  } else if (key === 'anggota') {
+    document.getElementById('anggotaId').value = row.id;
+    document.getElementById('anggotaNama').value = row.nama || '';
+    document.getElementById('anggotaPeran').value = row.peran || 'Guru Kelas';
+    document.getElementById('anggotaKelasMapel').value = row.kelasMapel || '';
+    document.getElementById('anggotaUrutan').value = row.urutan || '';
+    document.getElementById('anggotaFotoUrl').value = row.fotoUrl || '';
+  } else if (key === 'siklus') {
+    document.getElementById('siklusId').value = row.id;
+    document.getElementById('siklusTahap').value = row.tahap || 'refleksi';
+    document.getElementById('siklusJudul').value = row.judul || '';
+    document.getElementById('siklusTanggal').value = row.tanggal || '';
+    document.getElementById('siklusProgramTerkait').value = row.programTerkait || '';
+    document.getElementById('siklusDeskripsi').value = row.deskripsi || '';
+  } else if (key === 'jadwal') {
+    document.getElementById('jadwalId').value = row.id;
+    document.getElementById('jadwalJudul').value = row.judul || '';
+    document.getElementById('jadwalTahap').value = row.tahap || '';
+    document.getElementById('jadwalTanggal').value = row.tanggal || '';
+    document.getElementById('jadwalWaktu').value = row.waktu || '';
+    document.getElementById('jadwalTempat').value = row.tempat || '';
+    document.getElementById('jadwalCatatan').value = row.catatan || '';
+  } else if (key === 'notulen') {
+    document.getElementById('notulenId').value = row.id;
+    document.getElementById('notulenJudul').value = row.judul || '';
+    document.getElementById('notulenTanggal').value = row.tanggal || '';
+    document.getElementById('notulenTahap').value = row.tahap || '';
+    document.getElementById('notulenPemimpin').value = row.pemimpin || '';
+    document.getElementById('notulenStatusSel').value = row.status || 'draft';
+    document.getElementById('notulenPeserta').value = row.pesertaHadir || '';
+    document.getElementById('notulenRingkasan').value = row.ringkasanDiskusi || '';
+    document.getElementById('notulenKesepakatan').value = row.kesepakatan || '';
+  } else if (key === 'sumberdaya') {
+    document.getElementById('sumberdayaId').value = row.id;
+    document.getElementById('sumberdayaJudul').value = row.judul || '';
+    document.getElementById('sumberdayaJenis').value = row.jenis || 'Modul Ajar';
+    document.getElementById('sumberdayaMapel').value = row.mapel || '';
+    document.getElementById('sumberdayaKelas').value = row.kelas || '';
+    document.getElementById('sumberdayaPengunggah').value = row.pengunggah || '';
+    document.getElementById('sumberdayaTanggal').value = row.tanggal || '';
+    document.getElementById('sumberdayaFileUrl').value = row.fileUrl || '';
+    document.getElementById('sumberdayaKeterangan').value = row.keterangan || '';
+  } else if (key === 'jurnal') {
+    document.getElementById('jurnalId').value = row.id;
+    document.getElementById('jurnalJudul').value = row.judul || '';
+    document.getElementById('jurnalPenulis').value = row.penulis || '';
+    document.getElementById('jurnalTanggal').value = row.tanggal || '';
+    document.getElementById('jurnalRingkasan').value = row.ringkasan || '';
+    document.getElementById('jurnalIsi').value = row.isi || '';
+    document.getElementById('jurnalThumbnail').value = row.thumbnailUrl || '';
+    document.getElementById('jurnalStatusSel').value = row.status || 'draft';
+  } else if (key === 'galeri') {
+    document.getElementById('galeriId').value = row.id;
+    document.getElementById('galeriJudul').value = row.judul || '';
+    document.getElementById('galeriUrl').value = row.url || '';
+    document.getElementById('galeriKeterangan').value = row.keterangan || '';
+    document.getElementById('galeriTanggal').value = row.tanggal || '';
   }
-  const sorted = list.slice().sort(function (a, b) { return String(b.tanggal).localeCompare(String(a.tanggal)); });
-  wrap.innerHTML = sorted.map(function (n) {
-    const stage = SIKLUS_STAGES.find(function (s) { return s.key === n.tahap; });
-    return '<article class="notulen-card reveal">' +
-      '<div class="notulen-head">' +
-      (stage ? '<span class="status-pill stage-pill">' + stage.icon + ' ' + escapeHtml(stage.label) + '</span>' : '') +
-      '<span class="meta">' + escapeHtml(formatTanggal(n.tanggal)) + '</span>' +
-      '</div>' +
-      '<h3>' + escapeHtml(n.judul) + '</h3>' +
-      (n.pemimpin ? '<div class="notulen-row"><strong>Pemimpin rapat:</strong> ' + escapeHtml(n.pemimpin) + '</div>' : '') +
-      (n.pesertaHadir ? '<div class="notulen-row"><strong>Peserta hadir:</strong> ' + escapeHtml(n.pesertaHadir) + '</div>' : '') +
-      (n.ringkasanDiskusi ? '<div class="notulen-row"><strong>Ringkasan diskusi:</strong> ' + escapeHtml(n.ringkasanDiskusi) + '</div>' : '') +
-      (n.kesepakatan ? '<div class="notulen-row notulen-kesepakatan"><strong>Kesepakatan / tindak lanjut:</strong> ' + escapeHtml(n.kesepakatan) + '</div>' : '') +
-      '</article>';
-  }).join('');
-  observeReveal();
+  document.getElementById(key + 'Form').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function renderJurnal(list) {
-  const wrap = document.getElementById('jurnal-grid');
-  setupCarousel('jurnal-grid');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Belum ada jurnal mengajar yang dipublikasikan.</div>';
-    refreshCarousel('jurnal-grid');
-    return;
+function resetForm(key) {
+  document.getElementById(key + 'Form').reset();
+  document.getElementById(key + 'Id').value = '';
+}
+
+async function saveListItem(key, resourceName, data, idFieldId) {
+  const id = document.getElementById(idFieldId).value;
+  if (id) {
+    await apiPost({ action: 'update', resource: resourceName, password: getPassword(), id: id, data: data });
+  } else {
+    await apiPost({ action: 'create', resource: resourceName, password: getPassword(), data: data });
   }
-  wrap.innerHTML = list.map(function (j) {
-    const bg = j.thumbnailUrl ? 'style="background-image:url(\'' + j.thumbnailUrl + '\')"' : '';
-    return '<article class="jurnal-card reveal">' +
-      '<div class="jurnal-thumb" ' + bg + '><span>' + escapeHtml(formatTanggal(j.tanggal)) + '</span></div>' +
-      '<div class="jurnal-body">' +
-      '<h3>' + escapeHtml(j.judul) + '</h3>' +
-      '<p>' + escapeHtml(j.ringkasan || '') + '</p>' +
-      '<div class="byline">' + escapeHtml(j.penulis || '') + '</div>' +
-      '</div></article>';
-  }).join('');
-  observeReveal();
-  refreshCarousel('jurnal-grid');
 }
 
-function renderGaleri(list) {
-  const wrap = document.getElementById('galeri-grid');
-  setupCarousel('galeri-grid');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state">Galeri kegiatan akan tampil di sini setelah admin menambahkan foto.</div>';
-    refreshCarousel('galeri-grid');
-    return;
+const ROW_RENDERERS = {
+  program: renderProgramRow,
+  anggota: renderAnggotaRow,
+  siklus: renderSiklusRow,
+  jadwal: renderJadwalRow,
+  notulen: renderNotulenRow,
+  sumberdaya: renderSumberDayaRow,
+  jurnal: renderJurnalRow,
+  galeri: renderGaleriRow,
+};
+
+async function deleteItem(key, resourceName, id) {
+  if (!confirm('Hapus data ini?')) return;
+  try {
+    await apiPost({ action: 'delete', resource: resourceName, password: getPassword(), id: id });
+    loadList(key, resourceName, ROW_RENDERERS[key]);
+  } catch (err) {
+    alert(err.message);
   }
-  wrap.innerHTML = list.map(function (g) {
-    return '<figure class="galeri-item reveal"><img src="' + g.url + '" alt="' + escapeHtml(g.judul || 'Kegiatan BERANI') + '" loading="lazy">' +
-      '<figcaption>' + escapeHtml(g.keterangan || g.judul || '') + '</figcaption></figure>';
-  }).join('');
-  observeReveal();
-  refreshCarousel('galeri-grid');
 }
 
-function renderKontak(kontak) {
-  const list = document.getElementById('kontak-list');
-  list.innerHTML =
-    '<li><span class="tag">Alamat</span>' + escapeHtml(kontak.alamat || '') + '</li>' +
-    '<li><span class="tag">Email</span>' + escapeHtml(kontak.email || '') + '</li>' +
-    '<li><span class="tag">WhatsApp</span>' + escapeHtml(kontak.whatsapp || '') + '</li>' +
-    '<li><span class="tag">Instagram</span>' + escapeHtml(kontak.instagram || '') + '</li>' +
-    (kontak.youtube ? '<li><span class="tag">YouTube</span><a href="' + kontak.youtube + '" target="_blank" rel="noopener">' + escapeHtml(kontak.youtube) + '</a></li>' : '') +
-    (kontak.tiktok ? '<li><span class="tag">TikTok</span><a href="' + kontak.tiktok + '" target="_blank" rel="noopener">' + escapeHtml(kontak.tiktok) + '</a></li>' : '');
-
-  document.getElementById('heroCardAlamat').textContent = kontak.alamat || '—';
-  document.getElementById('heroCardEmail').textContent = kontak.email || '—';
-  document.getElementById('heroCardWhatsapp').textContent = kontak.whatsapp || '—';
+async function handleProgramSubmit(e) {
+  e.preventDefault();
+  const data = {
+    nama: document.getElementById('programNama').value,
+    deskripsi: document.getElementById('programDeskripsi').value,
+    kategori: document.getElementById('programKategori').value,
+    status: document.getElementById('programStatusSel').value,
+    tanggal: document.getElementById('programTanggal').value,
+    tahapSiklus: document.getElementById('programTahapSiklus').value,
+  };
+  try {
+    await saveListItem('program', 'program', data, 'programId');
+    resetForm('program');
+    flashStatus('programStatus', 'Program kerja tersimpan.', false);
+    loadList('program', 'ProgramKerja', renderProgramRow);
+  } catch (err) { flashStatus('programStatus', err.message, true); }
 }
 
-function formatTanggal(t) {
-  if (!t) return '';
-  const d = new Date(t);
-  if (isNaN(d)) return String(t);
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+async function handleAnggotaSubmit(e) {
+  e.preventDefault();
+  const data = {
+    nama: document.getElementById('anggotaNama').value,
+    peran: document.getElementById('anggotaPeran').value,
+    kelasMapel: document.getElementById('anggotaKelasMapel').value,
+    urutan: document.getElementById('anggotaUrutan').value,
+    fotoUrl: document.getElementById('anggotaFotoUrl').value,
+  };
+  try {
+    await saveListItem('anggota', 'anggota', data, 'anggotaId');
+    resetForm('anggota');
+    flashStatus('anggotaStatus', 'Anggota tersimpan.', false);
+    loadList('anggota', 'Anggota', renderAnggotaRow);
+  } catch (err) { flashStatus('anggotaStatus', err.message, true); }
+}
+
+async function handleSiklusSubmit(e) {
+  e.preventDefault();
+  const data = {
+    tahap: document.getElementById('siklusTahap').value,
+    judul: document.getElementById('siklusJudul').value,
+    tanggal: document.getElementById('siklusTanggal').value,
+    programTerkait: document.getElementById('siklusProgramTerkait').value,
+    deskripsi: document.getElementById('siklusDeskripsi').value,
+  };
+  try {
+    await saveListItem('siklus', 'siklus', data, 'siklusId');
+    resetForm('siklus');
+    flashStatus('siklusStatus', 'Kegiatan siklus tersimpan.', false);
+    loadList('siklus', 'SiklusKegiatan', renderSiklusRow);
+  } catch (err) { flashStatus('siklusStatus', err.message, true); }
+}
+
+async function handleNotulenSubmit(e) {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById('notulenJudul').value,
+    tanggal: document.getElementById('notulenTanggal').value,
+    tahap: document.getElementById('notulenTahap').value,
+    pemimpin: document.getElementById('notulenPemimpin').value,
+    pesertaHadir: document.getElementById('notulenPeserta').value,
+    ringkasanDiskusi: document.getElementById('notulenRingkasan').value,
+    kesepakatan: document.getElementById('notulenKesepakatan').value,
+    status: document.getElementById('notulenStatusSel').value,
+  };
+  try {
+    await saveListItem('notulen', 'notulen', data, 'notulenId');
+    resetForm('notulen');
+    flashStatus('notulenFormStatus', 'Notulen tersimpan.', false);
+    loadList('notulen', 'NotulenKombel', renderNotulenRow);
+  } catch (err) { flashStatus('notulenFormStatus', err.message, true); }
+}
+
+async function handleJadwalSubmit(e) {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById('jadwalJudul').value,
+    tahap: document.getElementById('jadwalTahap').value,
+    tanggal: document.getElementById('jadwalTanggal').value,
+    waktu: document.getElementById('jadwalWaktu').value,
+    tempat: document.getElementById('jadwalTempat').value,
+    catatan: document.getElementById('jadwalCatatan').value,
+  };
+  try {
+    await saveListItem('jadwal', 'jadwal', data, 'jadwalId');
+    resetForm('jadwal');
+    flashStatus('jadwalStatus', 'Jadwal tersimpan.', false);
+    loadList('jadwal', 'Jadwal', renderJadwalRow);
+  } catch (err) { flashStatus('jadwalStatus', err.message, true); }
+}
+
+async function handleSumberDayaSubmit(e) {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById('sumberdayaJudul').value,
+    jenis: document.getElementById('sumberdayaJenis').value,
+    mapel: document.getElementById('sumberdayaMapel').value,
+    kelas: document.getElementById('sumberdayaKelas').value,
+    pengunggah: document.getElementById('sumberdayaPengunggah').value,
+    tanggal: document.getElementById('sumberdayaTanggal').value,
+    fileUrl: document.getElementById('sumberdayaFileUrl').value,
+    keterangan: document.getElementById('sumberdayaKeterangan').value,
+  };
+  try {
+    await saveListItem('sumberdaya', 'sumberdaya', data, 'sumberdayaId');
+    resetForm('sumberdaya');
+    flashStatus('sumberdayaStatus', 'Sumber daya tersimpan.', false);
+    loadList('sumberdaya', 'SumberDaya', renderSumberDayaRow);
+  } catch (err) { flashStatus('sumberdayaStatus', err.message, true); }
+}
+
+async function handleJurnalSubmit(e) {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById('jurnalJudul').value,
+    penulis: document.getElementById('jurnalPenulis').value,
+    tanggal: document.getElementById('jurnalTanggal').value,
+    ringkasan: document.getElementById('jurnalRingkasan').value,
+    isi: document.getElementById('jurnalIsi').value,
+    thumbnailUrl: document.getElementById('jurnalThumbnail').value,
+    status: document.getElementById('jurnalStatusSel').value,
+  };
+  try {
+    await saveListItem('jurnal', 'jurnal', data, 'jurnalId');
+    resetForm('jurnal');
+    flashStatus('jurnalStatus', 'Jurnal tersimpan.', false);
+    loadList('jurnal', 'Jurnal', renderJurnalRow);
+  } catch (err) { flashStatus('jurnalStatus', err.message, true); }
+}
+
+async function handleGaleriSubmit(e) {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById('galeriJudul').value,
+    url: document.getElementById('galeriUrl').value,
+    keterangan: document.getElementById('galeriKeterangan').value,
+    tanggal: document.getElementById('galeriTanggal').value,
+  };
+  try {
+    await saveListItem('galeri', 'galeri', data, 'galeriId');
+    resetForm('galeri');
+    flashStatus('galeriStatus', 'Foto galeri tersimpan.', false);
+    loadList('galeri', 'Galeri', renderGaleriRow);
+  } catch (err) { flashStatus('galeriStatus', err.message, true); }
+}
+
+/* ---------------- Utilities ---------------- */
+function flashStatus(elId, message, isError) {
+  const el = document.getElementById(elId);
+  el.textContent = message;
+  el.className = (isError ? 'form-error' : 'form-success') + ' is-visible';
+  setTimeout(function () { el.classList.remove('is-visible'); }, 3500);
 }
 
 function escapeHtml(str) {
@@ -483,73 +537,35 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
+function escapeAttr(str) { return String(str).replace(/'/g, '&#39;'); }
 
-function observeReveal() {
-  const els = document.querySelectorAll('.reveal:not(.is-visible)');
-  const io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-  els.forEach(function (el) { io.observe(el); });
-}
-
-function setupNav() {
-  const toggle = document.getElementById('navToggle');
-  const links = document.getElementById('navLinks');
-  toggle.addEventListener('click', function () { links.classList.toggle('is-open'); });
-  links.querySelectorAll('a:not(.dropdown-menu a)').forEach(function (a) {
-    a.addEventListener('click', function () { links.classList.remove('is-open'); });
-  });
-  links.querySelectorAll('.dropdown-menu a').forEach(function (a) {
-    a.addEventListener('click', function () {
-      links.classList.remove('is-open');
-      document.querySelectorAll('.nav-dropdown.is-open').forEach(function (d) { d.classList.remove('is-open'); });
-    });
-  });
-
-  document.querySelectorAll('.nav-dropdown').forEach(function (dropdown) {
-    const btn = dropdown.querySelector('.dropdown-toggle');
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      const wasOpen = dropdown.classList.contains('is-open');
-      document.querySelectorAll('.nav-dropdown.is-open').forEach(function (d) { d.classList.remove('is-open'); });
-      if (!wasOpen) dropdown.classList.add('is-open');
-    });
-  });
-  document.addEventListener('click', function () {
-    document.querySelectorAll('.nav-dropdown.is-open').forEach(function (d) { d.classList.remove('is-open'); });
-  });
-}
-
-(async function init() {
-  document.getElementById('brandNama').textContent = BERANI_CONFIG.NAMA_ORGANISASI;
-  document.getElementById('brandSekolah').textContent = BERANI_CONFIG.NAMA_SEKOLAH;
-  document.getElementById('year').textContent = new Date().getFullYear();
+/* ---------------- Init ---------------- */
+document.addEventListener('DOMContentLoaded', function () {
   if (BERANI_CONFIG.LOGO_URL) {
-    // Tampilan awal sebelum data Profil selesai dimuat — akan ditimpa
-    // renderProfil() dengan Profil.fotoUrl begitu data tersedia.
-    document.getElementById('brandLogo').src = BERANI_CONFIG.LOGO_URL;
-    document.getElementById('heroEmblem').src = BERANI_CONFIG.LOGO_URL;
+    document.getElementById('loginLogo').src = BERANI_CONFIG.LOGO_URL;
+    document.getElementById('sideLogo').src = BERANI_CONFIG.LOGO_URL;
   }
-  document.getElementById('heroCardSub').textContent = BERANI_CONFIG.NAMA_SEKOLAH;
+  document.getElementById('loginForm').addEventListener('submit', handleLogin);
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('profilForm').addEventListener('submit', saveProfil);
+  document.getElementById('profilFotoUrl').addEventListener('input', function (e) {
+    updateLogoPreview(e.target.value);
+  });
+  document.getElementById('kontakForm').addEventListener('submit', saveKontak);
+  document.getElementById('programForm').addEventListener('submit', handleProgramSubmit);
+  document.getElementById('anggotaForm').addEventListener('submit', handleAnggotaSubmit);
+  document.getElementById('siklusForm').addEventListener('submit', handleSiklusSubmit);
+  document.getElementById('jadwalForm').addEventListener('submit', handleJadwalSubmit);
+  document.getElementById('notulenForm').addEventListener('submit', handleNotulenSubmit);
+  document.getElementById('sumberdayaForm').addEventListener('submit', handleSumberDayaSubmit);
+  document.getElementById('jurnalForm').addEventListener('submit', handleJurnalSubmit);
+  document.getElementById('galeriForm').addEventListener('submit', handleGaleriSubmit);
+  document.querySelectorAll('[data-reset]').forEach(function (btn) {
+    btn.addEventListener('click', function () { resetForm(btn.dataset.reset); });
+  });
+  setupTabs();
 
-  setupNav();
-  renderSpineAndPillars();
-
-  const data = await fetchBerani();
-  renderProfil(data.profil || {});
-  renderAnggota(data.anggota || []);
-  renderSiklus(data.siklus || []);
-  renderJadwal(data.jadwal || []);
-  renderNotulen(data.notulen || []);
-  renderProgram(data.program || []);
-  renderSumberDaya(data.sumberdaya || []);
-  renderJurnal(data.jurnal || []);
-  renderGaleri(data.galeri || []);
-  renderKontak(data.kontak || {});
-  observeReveal();
-})();
+  if (getPassword() && isConfigured()) {
+    showDashboard();
+  }
+});
